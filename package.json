@@ -1,0 +1,13 @@
+{
+  "name": "carddrop-cyber-app",
+  "version": "1.0.0",
+  "description": "CardDrop Telegram Mini App with 24/7 Bot and Live Backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "bot": "node bot.js"
+  },
+  "keywords": ["telegram", "mini-app", "twa"],
+  "author": "dold30",
+  "license": "MIT"
+}
