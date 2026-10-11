@@ -1,0 +1,2295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CardDrop Dark App</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        cyber: ['Rajdhani', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        pitchBlack: '#050505',
+                        cardBlack: '#0d0d0d',
+                        panelBorder: '#1c1c1c',
+                        accentGreen: '#00e676',
+                        accentGreenHover: '#00c853',
+                        btnGreen: '#00ff66',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Strict Pitch-Black Minimalist UI (NO GLOW, NO LIGHT BLOOM) */
+        body {
+            background-color: #050505;
+            color: #e5e7eb;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .dark-panel {
+            background-color: #0c0c0c;
+            border: 1px solid #1c1c1c;
+        }
+
+        .green-btn {
+            background-color: #00e676;
+            color: #050505;
+            font-weight: 700;
+            transition: all 0.15s ease;
+        }
+        .green-btn:hover {
+            background-color: #00c853;
+        }
+        .green-btn:active {
+            transform: scale(0.97);
+        }
+
+        .green-outline-btn {
+            border: 1px solid #00e676;
+            color: #00e676;
+            background: transparent;
+            transition: all 0.15s ease;
+        }
+        .green-outline-btn:hover {
+            background-color: rgba(0, 230, 118, 0.1);
+        }
+        .green-outline-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* 3D Real Physical Bank Cards Styling */
+        .perspective-container {
+            perspective: 1000px;
+        }
+
+        .physical-card {
+            width: 100%;
+            height: 195px;
+            border-radius: 18px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.12s ease-out;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+        }
+
+        /* Real Card Material 1: Matte Black Plastic */
+        .mat-plastic-real {
+            background: #111114;
+            border: 1px solid #28282e;
+            color: #f3f4f6;
+        }
+        .mat-plastic-real::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(45deg, rgba(255,255,255,0.015), rgba(255,255,255,0.015) 2px, transparent 2px, transparent 4px);
+            pointer-events: none;
+        }
+
+        /* Real Card Material 2: Brushed Cold Metal */
+        .mat-metal-real {
+            background: linear-gradient(135deg, #18191f 0%, #252830 50%, #15161a 100%);
+            border: 1px solid #3f4450;
+            color: #ffffff;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 10px 30px rgba(0, 0, 0, 0.9);
+        }
+        .mat-metal-real::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%);
+            pointer-events: none;
+        }
+
+        /* Physical EMV Chip */
+        .emv-chip {
+            width: 32px;
+            height: 24px;
+            background: linear-gradient(135deg, #d4af37 0%, #aa820a 100%);
+            border-radius: 4px;
+            border: 1px solid #735703;
+            position: relative;
+        }
+        .emv-chip::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border: 1px solid rgba(0,0,0,0.5);
+            border-radius: 2px;
+        }
+
+        /* Embossed numbers text effect */
+        .embossed-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 -1px 1px rgba(0,0,0,0.8), 0 1px 1px rgba(255,255,255,0.2);
+        }
+
+        /* Floating tap numbers */
+        .tap-float-num {
+            position: absolute;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: #00e676;
+            pointer-events: none;
+            animation: floatUp 0.6s ease-out forwards;
+            z-index: 60;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.9); }
+            100% { opacity: 0; transform: translateY(-70px) scale(1.25); }
+        }
+
+        /* Reel Track */
+        .reel-track {
+            display: flex;
+            transition: transform 4.6s cubic-bezier(0.12, 0.8, 0.22, 1);
+            will-change: transform;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 3px; height: 3px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+    </style>
+</head>
+<body class="bg-pitchBlack text-slate-200 min-h-screen flex flex-col font-sans overflow-x-hidden pb-20 select-none">
+
+    <!-- BANNED SCREEN OVERLAY -->
+    <div id="ban-screen" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-6 text-center hidden">
+        <i class="fa-solid fa-ban text-red-500 text-6xl mb-4"></i>
+        <h1 class="font-cyber font-black text-2xl text-red-500 tracking-wider">АККАУНТ ЗАБЛОКИРОВАН</h1>
+        <p class="text-xs text-slate-400 mt-2 max-w-xs">
+            Ваш аккаунт был заблокирован администрацией за нарушение правил.
+        </p>
+        <p class="text-xs text-slate-500 mt-4 font-mono">Поддержка: Telegram @dold30</p>
+    </div>
+
+    <!-- TOP MINIMAL HEADER -->
+    <header class="fixed top-0 left-0 right-0 z-40 bg-pitchBlack px-4 py-3 border-b border-panelBorder flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-lg bg-cardBlack border border-panelBorder flex items-center justify-center font-cyber font-bold text-slate-300 text-xs">
+                <i class="fa-solid fa-credit-card"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-1.5 leading-tight">
+                    <span id="user-name" class="font-cyber text-sm font-bold text-white tracking-wide">Игрок</span>
+                    <span id="user-prefix-badge" class="hidden text-[9px] font-mono px-1.5 py-0.2 rounded font-bold"></span>
+                </div>
+                <div class="text-[10px] text-slate-500 font-mono">
+                    <span id="user-handle">@user</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2.5">
+            <div class="text-right">
+                <div class="text-[9px] text-slate-500 font-mono uppercase tracking-wider">Баланс</div>
+                <div class="flex items-center justify-end space-x-1">
+                    <span id="user-balance" class="font-mono font-bold text-base text-accentGreen tracking-wider">10.0000</span>
+                    <span class="text-[9px] font-mono font-bold text-slate-500">TKN</span>
+                </div>
+            </div>
+            <button onclick="openSettingsModal()" class="w-8 h-8 rounded-lg bg-cardBlack border border-panelBorder text-slate-300 hover:text-white flex items-center justify-center active:scale-95 transition-all" title="Настройки">
+                <i class="fa-solid fa-gear text-xs"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="flex-1 pt-16 pb-16 px-4 max-w-md mx-auto w-full">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: MAIN MENU (REAL INTERACTIVE CARD)   -->
+        <!-- ========================================== -->
+        <section id="tab-tap" class="tab-content space-y-4 pt-1">
+            <!-- Stats -->
+            <div class="dark-panel p-3 rounded-xl flex items-center justify-between">
+                <div class="text-center flex-1 border-r border-panelBorder">
+                    <div class="text-[9px] text-slate-500 uppercase font-mono">Клик</div>
+                    <div id="stat-per-click" class="font-mono text-accentGreen font-bold text-sm">+0.00005</div>
+                </div>
+                <div class="text-center flex-1 border-r border-panelBorder">
+                    <div class="text-[9px] text-slate-500 uppercase font-mono">Пассив</div>
+                    <div id="stat-passive" class="font-mono text-slate-200 font-bold text-sm">+0.0000/с</div>
+                </div>
+                <div class="text-center flex-1">
+                    <div class="text-[9px] text-slate-500 uppercase font-mono">Множитель</div>
+                    <div id="stat-bonus-mult" class="font-mono text-accentGreen font-bold text-sm">x1.00</div>
+                </div>
+            </div>
+
+            <!-- PHYSICAL 3D TILT BANK CARD (MAIN TAP INTERACTION) -->
+            <div class="perspective-container my-3">
+                <div id="main-interactive-card" class="physical-card mat-metal-real p-5 flex flex-col justify-between">
+                    <!-- Top Card Bar -->
+                    <div class="flex justify-between items-center pointer-events-none">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="emv-chip"></div>
+                            <i class="fa-solid fa-wifi text-slate-400 rotate-90 text-sm"></i>
+                        </div>
+                        <div id="main-card-bank" class="font-cyber font-bold text-base tracking-wider text-slate-200">
+                            T-BANK BLACK METAL
+                        </div>
+                    </div>
+
+                    <!-- Middle Card Embossed Number -->
+                    <div class="text-center py-2 pointer-events-none">
+                        <div id="main-card-number" class="embossed-text text-xl text-slate-100">
+                            4532 •••• •••• 7777
+                        </div>
+                    </div>
+
+                    <!-- Bottom Card Holder & Exp Details -->
+                    <div class="flex justify-between items-end pointer-events-none text-xs font-mono">
+                        <div>
+                            <div class="text-[8px] text-slate-400 uppercase">CARDHOLDER</div>
+                            <div id="main-card-holder" class="font-bold text-slate-200 uppercase tracking-wider">CYBER OWNER</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-[8px] text-slate-400 uppercase">EXPIRES</div>
+                            <div id="main-card-exp" class="text-slate-300 font-bold">12/31</div>
+                        </div>
+                        <div class="font-cyber font-black text-base italic text-slate-300 tracking-wider">
+                            MIR
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-2">
+                    <span class="text-[10px] text-slate-500 font-mono tracking-wider uppercase">
+                        Наводите курсор для 3D наклона • Тапайте по карте
+                    </span>
+                </div>
+            </div>
+
+            <!-- Energy Bar -->
+            <div class="w-full px-1 space-y-1">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-400 font-mono text-[11px] flex items-center gap-1">
+                        <i class="fa-solid fa-bolt text-accentGreen text-[10px]"></i> Энергия
+                    </span>
+                    <span class="font-mono text-[11px] text-slate-200">
+                        <span id="energy-current" class="text-accentGreen">1000</span> / <span id="energy-max">1000</span>
+                    </span>
+                </div>
+                <div class="w-full bg-cardBlack h-2 rounded-full overflow-hidden border border-panelBorder">
+                    <div id="energy-bar" class="h-full bg-accentGreen transition-all duration-200" style="width: 100%;"></div>
+                </div>
+                <div class="flex justify-between items-center text-[10px] text-slate-500 font-mono pt-0.5">
+                    <span id="energy-regen-text">+3/сек</span>
+                    <button onclick="useFullEnergyBoost()" class="text-accentGreen hover:underline">
+                        ⚡ Восстановить (<span id="boost-timer">Готово</span>)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Upgrades Grid -->
+            <div class="space-y-2 pt-1">
+                <div class="text-[11px] font-mono text-slate-400 uppercase px-1">Улучшения</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="dark-panel p-3 rounded-xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-0.5">
+                                <span class="text-xs font-bold text-slate-200">Сила Клика</span>
+                                <span id="click-lvl-badge" class="text-[9px] text-accentGreen font-mono">L1</span>
+                            </div>
+                            <p class="text-[10px] text-slate-500 mb-2">+0.00002 к тапу</p>
+                        </div>
+                        <button id="buy-click-upg" class="green-btn w-full py-1.5 rounded-lg text-xs">
+                            <span id="click-upg-cost">0.0010</span> TKN
+                        </button>
+                    </div>
+
+                    <div class="dark-panel p-3 rounded-xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-0.5">
+                                <span class="text-xs font-bold text-slate-200">Авто-Фарм</span>
+                                <span id="passive-lvl-badge" class="text-[9px] text-accentGreen font-mono">L0</span>
+                            </div>
+                            <p class="text-[10px] text-slate-500 mb-2">+0.0005/сек</p>
+                        </div>
+                        <button id="buy-passive-upg" class="green-btn w-full py-1.5 rounded-lg text-xs">
+                            <span id="passive-upg-cost">0.0025</span> TKN
+                        </button>
+                    </div>
+
+                    <div class="dark-panel p-3 rounded-xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-0.5">
+                                <span class="text-xs font-bold text-slate-200">Аккумулятор</span>
+                                <span id="energy-lvl-badge" class="text-[9px] text-accentGreen font-mono">L1</span>
+                            </div>
+                            <p class="text-[10px] text-slate-500 mb-2">+250 энергии</p>
+                        </div>
+                        <button id="buy-energy-upg" class="green-btn w-full py-1.5 rounded-lg text-xs">
+                            <span id="energy-upg-cost">0.0050</span> TKN
+                        </button>
+                    </div>
+
+                    <div class="dark-panel p-3 rounded-xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-0.5">
+                                <span class="text-xs font-bold text-slate-200">Разгон Чипа</span>
+                                <span id="mult-lvl-badge" class="text-[9px] text-accentGreen font-mono">L1</span>
+                            </div>
+                            <p class="text-[10px] text-slate-500 mb-2">+5% ко всем доходам</p>
+                        </div>
+                        <button id="buy-mult-upg" class="green-btn w-full py-1.5 rounded-lg text-xs">
+                            <span id="mult-upg-cost">0.0100</span> TKN
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: ROULETTE (CASE CAN LOSE OR WIN)     -->
+        <!-- ========================================== -->
+        <section id="tab-drop" class="tab-content space-y-4 hidden">
+            <div class="text-center space-y-0.5">
+                <h2 class="font-cyber text-xl font-bold text-white tracking-wide">РУЛЕТКА КАРТ</h2>
+                <p class="text-[11px] text-slate-400">Шанс окупаемости ~35%. Карта может стоить дешевле кейса!</p>
+            </div>
+
+            <!-- Reel Container -->
+            <div class="relative dark-panel rounded-xl p-2 overflow-hidden">
+                <div class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-accentGreen z-20 pointer-events-none"></div>
+                <div class="overflow-hidden py-2">
+                    <div id="roulette-track" class="reel-track gap-2.5 items-center">
+                        <!-- Populated -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dropped Card Visual Display -->
+            <div id="drop-card-display" class="dark-panel rounded-xl p-4 space-y-3">
+                <div class="flex justify-between items-center text-xs">
+                    <span id="drop-material-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-black border border-panelBorder text-slate-300">Пластик</span>
+                    <span id="drop-profit-status" class="text-[10px] font-mono font-bold text-slate-400">Ожидание крутки</span>
+                </div>
+
+                <div id="drop-card-preview-element" class="mat-plastic-real w-full rounded-xl p-4 space-y-3 relative">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-2">
+                            <div class="emv-chip"></div>
+                            <i class="fa-solid fa-wifi text-xs text-slate-400 rotate-90"></i>
+                        </div>
+                        <div id="drop-bank-name" class="font-cyber font-bold text-sm tracking-wide text-white">T-Bank Cyber</div>
+                    </div>
+                    <div class="text-center py-1">
+                        <div id="drop-card-number" class="embossed-text text-base text-slate-100">
+                            4532 •••• •••• 7777
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-end text-[10px] font-mono text-slate-400">
+                        <span id="drop-card-holder">CYBER OWNER</span>
+                        <span id="drop-pay-system">MIR</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-1 border-t border-panelBorder text-xs">
+                    <div>
+                        <div class="text-[9px] text-slate-500 font-mono">Оценка скупщика</div>
+                        <div id="drop-value" class="font-mono font-bold text-sm text-accentGreen">~0.00 TKN</div>
+                    </div>
+                    <button onclick="switchTab('pawn')" class="text-xs text-accentGreen hover:underline font-mono">
+                        Продать скупщику →
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2 Case Tiers with Real Risk of Losing Value -->
+            <div class="space-y-2">
+                <div class="dark-panel p-3 rounded-xl flex items-center justify-between">
+                    <div>
+                        <div class="text-xs font-bold text-slate-200">Пластиковый Кейс (1.00 TKN)</div>
+                        <div class="text-[10px] text-slate-500">Дроп: 0.15 TKN (неокуп) до 3.50 TKN (окуп)</div>
+                    </div>
+                    <button onclick="startRouletteSpin(1.0, 'plastic')" class="green-btn px-4 py-2 rounded-lg text-xs">
+                        1.00 TKN
+                    </button>
+                </div>
+
+                <div class="dark-panel p-3 rounded-xl flex items-center justify-between">
+                    <div>
+                        <div class="text-xs font-bold text-white">Металл Кейс (25.00 TKN)</div>
+                        <div class="text-[10px] text-slate-500">Дроп: 4.00 TKN (неокуп) до 110.00 TKN (джекпот)</div>
+                    </div>
+                    <button onclick="startRouletteSpin(25.0, 'metal')" class="green-btn px-4 py-2 rounded-lg text-xs">
+                        25.00 TKN
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: PAWNSHOP (BUYER "VECTOR")           -->
+        <!-- ========================================== -->
+        <section id="tab-pawn" class="tab-content space-y-4 hidden">
+            <div class="text-center space-y-0.5">
+                <h2 class="font-cyber text-xl font-bold text-white tracking-wide">ТЕНЕВОЙ СКУПЩИК</h2>
+                <p class="text-[11px] text-slate-400">Оптовая продажа карт. Жадность блокирует лавку на 5 минут!</p>
+            </div>
+
+            <!-- Cooldown Banner -->
+            <div id="pawn-cooldown-banner" class="dark-panel p-3.5 rounded-xl border border-red-500/50 space-y-1 text-center hidden">
+                <div class="text-xs font-bold text-red-500 flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-lock"></i> Скупщик отказался от сделки и ушел!
+                </div>
+                <p class="text-[11px] text-slate-400">Торги заблокированы на 5 минут из-за жадности. Возвращайтесь через:</p>
+                <div id="pawn-cooldown-timer" class="font-mono font-black text-2xl text-accentGreen">05:00</div>
+            </div>
+
+            <!-- Status Box -->
+            <div id="pawn-normal-box" class="dark-panel p-3 rounded-xl flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-black border border-panelBorder flex items-center justify-center text-accentGreen text-lg flex-shrink-0">
+                    <i class="fa-solid fa-user-secret"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="text-xs font-bold text-slate-200">Скупщик "Вектор"</div>
+                    <p id="pawn-status-desc" class="text-[11px] text-slate-400 mt-0.5 leading-snug">
+                        "Выдели нужные карты галочками. Я предложу цену за опт."
+                    </p>
+                </div>
+            </div>
+
+            <!-- Toolbar & Selectors -->
+            <div class="space-y-1.5">
+                <div class="flex justify-between items-center px-1">
+                    <span class="text-[11px] font-mono text-slate-400 uppercase">
+                        Инвентарь (<span id="inv-count-badge">0</span>)
+                    </span>
+                    <span id="selected-summary-text" class="text-[11px] font-mono text-accentGreen">
+                        Выбрано: 0 карт (~0.00 TKN)
+                    </span>
+                </div>
+                <div class="flex items-center gap-2 px-1">
+                    <button onclick="toggleSelectAllCards()" class="green-outline-btn text-[10px] font-mono px-2 py-1 rounded-lg">
+                        Выбрать все
+                    </button>
+                    <button onclick="selectOnlyPlasticCards()" class="text-[10px] font-mono px-2 py-1 bg-cardBlack border border-panelBorder rounded-lg text-slate-400">
+                        Только пластик
+                    </button>
+                    <button onclick="clearSelectedCards()" class="text-[10px] font-mono px-2 py-1 bg-cardBlack border border-panelBorder rounded-lg text-slate-500 ml-auto">
+                        Сбросить
+                    </button>
+                </div>
+            </div>
+
+            <!-- Inventory List -->
+            <div id="pawn-inventory-list" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- Bargain Options Panel -->
+            <div id="pawn-bargain-panel" class="dark-panel p-3.5 rounded-xl space-y-3 hidden">
+                <div class="flex justify-between items-center pb-2 border-b border-panelBorder">
+                    <div>
+                        <span class="text-[9px] text-slate-400 font-mono uppercase">Базовая цена выбранных:</span>
+                        <div id="pawn-base-price" class="font-mono text-lg font-bold text-accentGreen">0.00 TKN</div>
+                    </div>
+                    <span id="pawn-selected-count-badge" class="text-[10px] px-2 py-0.5 rounded font-mono bg-black border border-panelBorder text-slate-300">0 карт</span>
+                </div>
+
+                <div class="space-y-2 pt-0.5" id="pawn-buttons-container">
+                    <button onclick="executePawnDeal(1.0, 100)" class="deal-btn w-full p-2.5 bg-cardBlack hover:bg-black rounded-lg border border-panelBorder flex justify-between items-center active:scale-98 transition-all">
+                        <div class="text-left">
+                            <div class="text-xs font-bold text-slate-200">Согласиться сразу</div>
+                            <div class="text-[9px] text-accentGreen font-mono">Шанс: 100% (Без риска)</div>
+                        </div>
+                        <div class="font-mono font-bold text-sm text-slate-200" id="pawn-opt-1">0.00 TKN</div>
+                    </button>
+
+                    <button onclick="executePawnDeal(1.15, 55)" class="deal-btn w-full p-2.5 bg-cardBlack hover:bg-black rounded-lg border border-panelBorder flex justify-between items-center active:scale-98 transition-all">
+                        <div class="text-left">
+                            <div class="text-xs font-bold text-accentGreen">+15% Наценка (Убедить)</div>
+                            <div class="text-[9px] text-slate-400 font-mono">Шанс: 55%</div>
+                        </div>
+                        <div class="font-mono font-bold text-sm text-accentGreen" id="pawn-opt-2">0.00 TKN</div>
+                    </button>
+
+                    <button onclick="executePawnDeal(1.35, 25)" class="deal-btn w-full p-2.5 bg-cardBlack hover:bg-black rounded-lg border border-panelBorder flex justify-between items-center active:scale-98 transition-all">
+                        <div class="text-left">
+                            <div class="text-xs font-bold text-yellow-400">+35% Надавить на цену</div>
+                            <div class="text-[9px] text-yellow-500 font-mono">Шанс: 25% (Отказ = блок на 5 мин!)</div>
+                        </div>
+                        <div class="font-mono font-bold text-sm text-yellow-400" id="pawn-opt-3">0.00 TKN</div>
+                    </button>
+
+                    <button onclick="executePawnDeal(1.70, 10)" class="deal-btn w-full p-2.5 bg-cardBlack hover:bg-black rounded-lg border border-red-500/30 flex justify-between items-center active:scale-98 transition-all">
+                        <div class="text-left">
+                            <div class="text-xs font-bold text-red-400">+70% Ва-банк куш</div>
+                            <div class="text-[9px] text-red-500 font-mono">Шанс: 10% (Отказ = блок на 5 мин!)</div>
+                        </div>
+                        <div class="font-mono font-bold text-sm text-red-400" id="pawn-opt-4">0.00 TKN</div>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: MARKETPLACE                         -->
+        <!-- ========================================== -->
+        <section id="tab-market" class="tab-content space-y-4 hidden">
+            <div class="text-center space-y-0.5">
+                <h2 class="font-cyber text-xl font-bold text-white tracking-wide">P2P БИРЖА КАРТ</h2>
+                <p class="text-[11px] text-slate-400">Покупка и продажа банковских карт между игроками</p>
+            </div>
+
+            <div class="dark-panel p-3 rounded-xl flex justify-between items-center">
+                <div>
+                    <div class="text-xs font-bold text-slate-200">Выставить свою карту</div>
+                    <div class="text-[10px] text-slate-500">Комиссия сервиса 8%</div>
+                </div>
+                <button onclick="openCreateListingModal()" class="green-btn px-3 py-1.5 rounded-lg text-xs">
+                    + Выставить карту
+                </button>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex justify-between items-center px-1">
+                    <span class="text-[11px] font-mono text-slate-400 uppercase">Лоты</span>
+                    <span class="text-[11px] font-mono text-accentGreen" id="market-count">0 лотов</span>
+                </div>
+                <div id="market-listings-container" class="space-y-2 max-h-96 overflow-y-auto pr-1">
+                    <!-- Dynamic Listings -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: REAL LEADERBOARD & REAL ADS WALL    -->
+        <!-- ========================================== -->
+        <section id="tab-leaderboard" class="tab-content space-y-4 hidden">
+            <div class="text-center space-y-0.5">
+                <h2 class="font-cyber text-xl font-bold text-white tracking-wide">РЕАЛЬНЫЙ ЛИДЕРБОРД</h2>
+                <p class="text-[11px] text-slate-400">Живой рейтинг игроков с витриной их объявлений</p>
+            </div>
+
+            <!-- Current User Banner + Post Ad Button -->
+            <div class="dark-panel p-3.5 rounded-xl space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2.5">
+                        <div id="leader-my-rank" class="font-mono font-bold text-base text-accentGreen">#--</div>
+                        <div id="leader-my-avatar" class="w-8 h-8 rounded-lg bg-black border border-panelBorder flex items-center justify-center font-bold text-xs text-slate-200">
+                            U
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-1.5 leading-tight">
+                                <span id="leader-my-name" class="font-cyber font-bold text-xs text-white">Вы</span>
+                                <span id="leader-my-prefix" class="hidden text-[8px] font-mono px-1 py-0.2 rounded font-bold"></span>
+                            </div>
+                            <div class="text-[9px] text-slate-500 font-mono">Ваша карточка в рейтинге</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div id="leader-my-score" class="font-mono font-bold text-accentGreen text-sm">0.00 TKN</div>
+                        <div class="text-[9px] text-slate-500 font-mono">Баланс</div>
+                    </div>
+                </div>
+
+                <div class="border-t border-panelBorder pt-2 flex items-center justify-between">
+                    <span class="text-[10px] font-mono text-slate-400">Ваше объявление в Топе:</span>
+                    <button onclick="openPostAdModal()" class="text-[10px] font-mono font-bold text-accentGreen hover:underline flex items-center gap-1">
+                        <i class="fa-solid fa-bullhorn"></i> <span id="btn-ad-label">Выставить объявление</span>
+                    </button>
+                </div>
+
+                <div id="leader-my-ad-content" class="text-[11px] text-slate-300 bg-black p-2.5 rounded-lg border border-panelBorder hidden">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex justify-between items-center px-1">
+                    <span class="text-[11px] font-mono text-slate-400 uppercase">Игроки онлайн</span>
+                    <button onclick="fetchRealLeaderboard()" class="text-[10px] text-accentGreen hover:underline font-mono flex items-center gap-1">
+                        <i class="fa-solid fa-arrows-rotate"></i> Обновить
+                    </button>
+                </div>
+                <div id="leaderboard-list" class="space-y-2 max-h-96 overflow-y-auto pr-1">
+                    <!-- Real players injected here -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-pitchBlack border-t border-panelBorder px-2 py-2">
+        <div class="max-w-md mx-auto grid grid-cols-5 gap-1 text-center">
+            <button onclick="switchTab('tap')" id="nav-tap" class="nav-btn active flex flex-col items-center py-1 text-accentGreen transition-all">
+                <i class="fa-solid fa-credit-card text-base mb-0.5"></i>
+                <span class="text-[10px] font-mono font-bold">Главная</span>
+            </button>
+            <button onclick="switchTab('drop')" id="nav-drop" class="nav-btn flex flex-col items-center py-1 text-slate-500 hover:text-slate-200 transition-all">
+                <i class="fa-solid fa-dice text-base mb-0.5"></i>
+                <span class="text-[10px] font-mono font-bold">Рулетка</span>
+            </button>
+            <button onclick="switchTab('pawn')" id="nav-pawn" class="nav-btn flex flex-col items-center py-1 text-slate-500 hover:text-slate-200 transition-all">
+                <i class="fa-solid fa-user-secret text-base mb-0.5"></i>
+                <span class="text-[10px] font-mono font-bold">Скупщик</span>
+            </button>
+            <button onclick="switchTab('market')" id="nav-market" class="nav-btn flex flex-col items-center py-1 text-slate-500 hover:text-slate-200 transition-all">
+                <i class="fa-solid fa-store text-base mb-0.5"></i>
+                <span class="text-[10px] font-mono font-bold">Биржа</span>
+            </button>
+            <button onclick="switchTab('leaderboard')" id="nav-leaderboard" class="nav-btn flex flex-col items-center py-1 text-slate-500 hover:text-slate-200 transition-all">
+                <i class="fa-solid fa-trophy text-base mb-0.5"></i>
+                <span class="text-[10px] font-mono font-bold">Топ</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ========================================== -->
+    <!-- MODAL: SETTINGS & PROMOCODES & SUPPORT     -->
+    <!-- ========================================== -->
+    <div id="modal-settings" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="dark-panel w-full max-w-sm rounded-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center pb-2 border-b border-panelBorder">
+                <h3 class="font-cyber font-bold text-base text-white">Настройки & Поддержка</h3>
+                <button onclick="closeModal('modal-settings')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Support Section for dold30 -->
+            <div class="p-3 bg-cardBlack rounded-xl border border-panelBorder space-y-1.5">
+                <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                    <i class="fa-brands fa-telegram text-accentGreen"></i> Поддержка & Разработчик
+                </div>
+                <p class="text-[11px] text-slate-400">По всем вопросам, багам и предложениям пишите в Telegram:</p>
+                <a href="https://t.me/dold30" target="_blank" class="block w-full text-center py-2 bg-black border border-accentGreen text-accentGreen font-mono font-bold text-xs rounded-lg hover:bg-accentGreen hover:text-black transition-all">
+                    Написать @dold30
+                </a>
+            </div>
+
+            <!-- Promocodes Section -->
+            <div class="p-3 bg-cardBlack rounded-xl border border-panelBorder space-y-2">
+                <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-ticket text-accentGreen"></i> Активация промокода
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="input-promocode" placeholder="Введите промокод..." class="flex-1 bg-black border border-panelBorder rounded-lg px-2.5 py-1.5 text-xs text-white font-mono uppercase outline-none focus:border-accentGreen">
+                    <button onclick="applyPromocode()" class="green-btn px-3 py-1.5 rounded-lg text-xs">
+                        ОК
+                    </button>
+                </div>
+                <div class="text-[9px] text-slate-500 font-mono">Промокоды: DOLD30, START2026, CYBERFREE</div>
+            </div>
+
+            <!-- Admin Password Access Trigger -->
+            <div class="p-3 bg-cardBlack rounded-xl border border-panelBorder space-y-2">
+                <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved text-red-500"></i> Панель Администратора
+                </div>
+                <div class="flex gap-2">
+                    <input type="password" id="input-admin-pass" placeholder="Пароль администратора..." class="flex-1 bg-black border border-panelBorder rounded-lg px-2.5 py-1.5 text-xs text-white font-mono outline-none focus:border-red-500">
+                    <button onclick="verifyAdminPassword()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xs active:scale-95 transition-all">
+                        Вход
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sound toggle -->
+            <div class="flex justify-between items-center text-xs pt-1">
+                <span class="text-slate-400">Звуковые эффекты:</span>
+                <button onclick="toggleAudio()" id="btn-toggle-sound" class="font-mono text-accentGreen font-bold">
+                    ВКЛЮЧЕНЫ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: ADMIN PANEL (PASSWORD 1190234)      -->
+    <!-- ========================================== -->
+    <div id="modal-admin-panel" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="dark-panel w-full max-w-sm rounded-2xl p-5 border border-red-500/40 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center pb-2 border-b border-panelBorder">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-crown text-red-500"></i>
+                    <h3 class="font-cyber font-bold text-base text-white">Админ-Панель (Управление)</h3>
+                </div>
+                <button onclick="closeModal('modal-admin-panel')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Feature 1: Give Money to Self -->
+            <div class="p-3 bg-cardBlack rounded-xl border border-panelBorder space-y-2">
+                <div class="text-xs font-bold text-white">💰 Выдача баланса себе:</div>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="adminGiveMoney(100)" class="py-1.5 bg-black border border-panelBorder hover:border-accentGreen text-accentGreen font-mono font-bold text-xs rounded-lg">+100</button>
+                    <button onclick="adminGiveMoney(1000)" class="py-1.5 bg-black border border-panelBorder hover:border-accentGreen text-accentGreen font-mono font-bold text-xs rounded-lg">+1,000</button>
+                    <button onclick="adminGiveMoney(10000)" class="py-1.5 bg-black border border-panelBorder hover:border-accentGreen text-accentGreen font-mono font-bold text-xs rounded-lg">+10,000</button>
+                </div>
+            </div>
+
+            <!-- Feature 2: Assign Prefixes (Tester, Dev, Scam, etc.) -->
+            <div class="p-3 bg-cardBlack rounded-xl border border-panelBorder space-y-2">
+                <div class="text-xs font-bold text-white">🏷 Установка префикса себе:</div>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <button onclick="adminSetPrefix('Разраб', 'bg-red-600 text-white')" class="py-1.5 bg-black border border-panelBorder text-xs font-mono font-bold text-red-400 rounded-lg">Разраб</button>
+                    <button onclick="adminSetPrefix('Тестер', 'bg-blue-600 text-white')" class="py-1.5 bg-black border border-panelBorder text-xs font-mono font-bold text-blue-400 rounded-lg">Тестер</button>
+                    <button onclick="adminSetPrefix('Скам', 'bg-yellow-500 text-black')" class="py-1.5 bg-black border border-panelBorder text-xs font-mono font-bold text-yellow-500 rounded-lg">Скам</button>
+                    <button onclick="adminSetPrefix('VIP', 'bg-emerald-500 text-black')" class="py-1.5 bg-black border border-panelBorder text-xs font-mono font-bold text-accentGreen rounded-lg">VIP</button>
+                </div>
+            </div>
+
+            <!-- Feature 3: Ban & Unban Players -->
+            <div class="p-3 bg-cardBlack rounded-xl border border-panelBorder space-y-2">
+                <div class="text-xs font-bold text-white">🔨 Бан / Разбан игроков:</div>
+                <div id="admin-players-ban-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: POST AD TO LEADERBOARD              -->
+    <!-- ========================================== -->
+    <div id="modal-post-ad" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="dark-panel w-full max-w-sm rounded-2xl p-5 space-y-3.5">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-bullhorn text-accentGreen"></i>
+                    <h3 class="font-cyber font-bold text-base text-white">Выставить объявление в Топ</h3>
+                </div>
+                <button onclick="closeModal('modal-post-ad')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-2.5">
+                <div>
+                    <label class="text-[11px] font-mono text-slate-400 block mb-1">Выберите карту</label>
+                    <select id="ad-select-card" class="w-full bg-black border border-panelBorder rounded-lg p-2 text-xs text-white outline-none">
+                        <!-- Populated -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-mono text-slate-400 block mb-1">Цена карты (TKN)</label>
+                    <input type="number" id="ad-input-price" placeholder="50.0" step="1" class="w-full bg-black border border-panelBorder rounded-lg p-2 text-xs text-white outline-none">
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-mono text-slate-400 block mb-1">Текст объявления</label>
+                    <input type="text" id="ad-input-text" placeholder="Продам металл 7777! Пишите в TG" maxlength="60" class="w-full bg-black border border-panelBorder rounded-lg p-2 text-xs text-white outline-none">
+                </div>
+
+                <div class="pt-1 flex gap-2">
+                    <button onclick="submitLeaderboardAd()" class="green-btn flex-1 py-2.5 rounded-lg text-xs">
+                        Опубликовать в Топ
+                    </button>
+                    <button onclick="removeLeaderboardAd()" class="py-2.5 px-3 bg-black border border-panelBorder text-slate-400 text-xs rounded-lg active:scale-95">
+                        Удалить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: CREATE P2P LISTING                  -->
+    <!-- ========================================== -->
+    <div id="modal-create-listing" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="dark-panel w-full max-w-sm rounded-2xl p-5 space-y-3.5">
+            <div class="flex justify-between items-center">
+                <h3 class="font-cyber font-bold text-base text-white">Выставить на Биржу</h3>
+                <button onclick="closeModal('modal-create-listing')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="text-[11px] font-mono text-slate-400 block mb-1">Выберите карту</label>
+                    <select id="modal-select-card" class="w-full bg-black border border-panelBorder rounded-lg p-2 text-xs text-white outline-none">
+                        <!-- Populated -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-mono text-slate-400 block mb-1">Цена продажи (TKN)</label>
+                    <input type="number" id="modal-input-price" placeholder="25.0" step="1" class="w-full bg-black border border-panelBorder rounded-lg p-2 text-xs text-white outline-none">
+                </div>
+
+                <div class="p-2.5 bg-black rounded-lg border border-panelBorder text-[10px] text-slate-400 space-y-1">
+                    <div class="flex justify-between">
+                        <span>Комиссия биржи (8%):</span>
+                        <span id="modal-fee-calc" class="text-red-400 font-mono">-0.00 TKN</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-slate-200 pt-1 border-t border-panelBorder">
+                        <span>Вы получите:</span>
+                        <span id="modal-receive-calc" class="text-accentGreen font-mono">0.00 TKN</span>
+                    </div>
+                </div>
+
+                <button onclick="submitP2PListing()" class="green-btn w-full py-2.5 rounded-lg text-xs">
+                    Опубликовать Лот
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: STORE (TELEGRAM STARS)              -->
+    <!-- ========================================== -->
+    <div id="modal-store" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="dark-panel w-full max-w-sm rounded-2xl p-5 space-y-3.5">
+            <div class="flex justify-between items-center">
+                <h3 class="font-cyber font-bold text-base text-white">Пополнение Баланса</h3>
+                <button onclick="closeModal('modal-store')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="text-[11px] font-mono text-slate-400 block mb-1">Количество токенов (TKN)</label>
+                    <input type="number" id="store-custom-amount" value="50" min="1" step="5" oninput="calculateStoreTotal()" class="w-full bg-black border border-panelBorder rounded-lg p-2.5 text-base font-mono font-bold text-white outline-none">
+                </div>
+
+                <div class="grid grid-cols-4 gap-1.5">
+                    <button onclick="setStorePreset(10)" class="py-1.5 bg-black border border-panelBorder rounded-lg text-xs font-mono text-slate-300">10</button>
+                    <button onclick="setStorePreset(50)" class="py-1.5 bg-black border border-panelBorder rounded-lg text-xs font-mono text-slate-300">50</button>
+                    <button onclick="setStorePreset(250)" class="py-1.5 bg-black border border-panelBorder rounded-lg text-xs font-mono text-slate-300">250</button>
+                    <button onclick="setStorePreset(1000)" class="py-1.5 bg-black border border-panelBorder rounded-lg text-xs font-mono text-slate-300">1000</button>
+                </div>
+
+                <div class="p-2.5 bg-black rounded-lg border border-panelBorder text-xs space-y-1">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">К зачислению:</span>
+                        <span id="store-summary-tokens" class="font-mono font-bold text-accentGreen">50.00 TKN</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Стоимость Stars:</span>
+                        <span id="store-summary-price" class="font-mono font-bold text-slate-200">⭐ 25 Stars ($0.50)</span>
+                    </div>
+                </div>
+
+                <button onclick="payViaTelegramStars()" class="green-btn w-full py-2.5 rounded-lg text-xs flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-star"></i> Оплатить через Telegram Stars
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-box" class="fixed top-14 left-1/2 -translate-x-1/2 z-50 max-w-xs w-[90%] px-3.5 py-2.5 rounded-xl dark-panel border border-accentGreen text-center text-xs font-mono font-bold text-white opacity-0 pointer-events-none transition-all duration-300 shadow-2xl">
+        Уведомление
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SCRIPT ENGINE                              -->
+    <!-- ========================================== -->
+    <script>
+        /* SOUND ENGINE */
+        class SimpleAudio {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) this.ctx = new AudioContext();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+            }
+            playTone(freq, type = 'sine', duration = 0.08, vol = 0.1) {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    if (!this.ctx) return;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            }
+            tap() { this.playTone(420, 'sine', 0.04, 0.08); }
+            win() {
+                this.playTone(523, 'triangle', 0.1, 0.15);
+                setTimeout(() => this.playTone(784, 'triangle', 0.15, 0.15), 100);
+            }
+            fail() { this.playTone(180, 'sawtooth', 0.2, 0.15); }
+        }
+        const audio = new SimpleAudio();
+        function toggleAudio() {
+            audio.enabled = !audio.enabled;
+            const btn = document.getElementById('btn-toggle-sound');
+            if (btn) btn.innerText = audio.enabled ? 'ВКЛЮЧЕНЫ' : 'ВЫКЛЮЧЕНЫ';
+            showToast(audio.enabled ? 'Звук включен' : 'Звук выключен');
+        }
+
+        /* TELEGRAM INTEGRATION */
+        const tg = window.Telegram?.WebApp;
+        function triggerHaptic(type = 'light') {
+            try {
+                if (tg && tg.HapticFeedback) {
+                    if (['light', 'medium', 'heavy'].includes(type)) tg.HapticFeedback.impactOccurred(type);
+                    else tg.HapticFeedback.notificationOccurred(type);
+                }
+            } catch(e) {}
+        }
+
+        /* ONLY 2 CLEAN REALISTIC MATERIALS */
+        const materialsList = [
+            { id: 'plastic', name: 'Пластик', mult: 1.0, css: 'mat-plastic-real' },
+            { id: 'metal', name: 'Металл', mult: 8.0, css: 'mat-metal-real' }
+        ];
+
+        const banksList = [
+            { name: 'T-Bank Cyber', paySystem: 'MIR' },
+            { name: 'Sber Neobank', paySystem: 'MIR' },
+            { name: 'Alfa Private', paySystem: 'MIR' },
+            { name: 'Revolut Metal', paySystem: 'VISA' },
+            { name: 'Swiss Offshore', paySystem: 'CyberPay' }
+        ];
+
+        /* STORAGE & INITIAL STATE */
+        const STORAGE_KEY = 'carddrop_black_green_v5';
+
+        let currentUser = {
+            id: '1000',
+            first_name: 'Игрок',
+            last_name: '',
+            username: 'cyber_player',
+            prefixText: '',
+            prefixCss: '',
+            isBanned: false
+        };
+
+        const defaultGameState = {
+            balance: 10.0000,
+            clickPower: 0.00005,
+            clickLvl: 1,
+            clickUpgradeCost: 0.0010,
+            passivePower: 0.0000,
+            passiveLvl: 0,
+            passiveUpgradeCost: 0.0025,
+            energyMax: 1000,
+            energyLvl: 1,
+            energyUpgradeCost: 0.0050,
+            incomeMultiplier: 1.0,
+            multLvl: 1,
+            multUpgradeCost: 0.0100,
+            energy: 1000,
+            totalTaps: 0,
+            lastBoostTime: 0,
+            pawnCooldownUntil: 0,
+            redeemedPromocodes: [],
+            myLeaderboardAd: null,
+            inventory: [
+                {
+                    id: 1,
+                    bank: 'T-Bank Black Metal',
+                    number: '4532 •••• •••• 7777',
+                    fullNumber: '4532 9811 0023 7777',
+                    material: 'Металл',
+                    materialId: 'metal',
+                    paySystem: 'MIR',
+                    pattern: 'Квадро 7777',
+                    exp: '12/31',
+                    value: 40.0
+                },
+                {
+                    id: 2,
+                    bank: 'Sber Neobank',
+                    number: '2202 •••• •••• 0199',
+                    fullNumber: '2202 4410 5512 0199',
+                    material: 'Пластик',
+                    materialId: 'plastic',
+                    paySystem: 'MIR',
+                    pattern: 'Стандарт',
+                    exp: '11/29',
+                    value: 0.45
+                }
+            ],
+            marketListings: [
+                { id: 101, sellerName: '@whale_trader', bank: 'Revolut Metal', number: '4111 •••• •••• 0001', material: 'Металл', price: 80.0, isMine: false },
+                { id: 102, sellerName: '@neo_trader', bank: 'T-Bank Cyber', number: '4532 •••• •••• 1234', material: 'Пластик', price: 10.0, isMine: false }
+            ]
+        };
+
+        let gameState = { ...defaultGameState };
+        let selectedPawnCardIds = new Set();
+
+        function saveGame() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+            } catch(e) {}
+        }
+
+        function loadGame() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) gameState = { ...defaultGameState, ...JSON.parse(saved) };
+            } catch(e) {}
+        }
+
+        /* REAL CARD GENERATOR (CAN LOSE OR WIN!) */
+        function generateBankCard(tier = 'plastic') {
+            const bank = banksList[Math.floor(Math.random() * banksList.length)];
+            
+            let mat = materialsList[0];
+            let value = 0;
+
+            if (tier === 'metal') {
+                // Metal case cost is 25 TKN
+                // 65% chance to LOSE value (0.25x - 0.7x), 35% chance to PROFIT (1.5x - 4.5x)
+                const isProfit = Math.random() < 0.35;
+                if (isProfit) {
+                    mat = materialsList[1]; // Metal
+                    value = parseFloat((25.0 * (1.4 + Math.random() * 3.0)).toFixed(2)); // 35 - 110 TKN (PROFIT)
+                } else {
+                    mat = (Math.random() < 0.5) ? materialsList[1] : materialsList[0];
+                    value = parseFloat((25.0 * (0.15 + Math.random() * 0.45)).toFixed(2)); // 3.75 - 15 TKN (LOSS)
+                }
+            } else {
+                // Plastic case cost is 1.0 TKN
+                // 70% chance to LOSE value (0.15 - 0.70 TKN), 30% chance to PROFIT (1.20 - 3.50 TKN)
+                const isProfit = Math.random() < 0.30;
+                if (isProfit) {
+                    mat = (Math.random() < 0.2) ? materialsList[1] : materialsList[0];
+                    value = parseFloat((1.0 * (1.2 + Math.random() * 2.3)).toFixed(2)); // 1.2 - 3.5 TKN (PROFIT)
+                } else {
+                    mat = materialsList[0];
+                    value = parseFloat((1.0 * (0.15 + Math.random() * 0.55)).toFixed(2)); // 0.15 - 0.70 TKN (LOSS)
+                }
+            }
+
+            const pRoll = Math.random();
+            let lastDigits = '7777';
+            let pattern = 'Стандарт';
+            if (pRoll < 0.15) {
+                const d = Math.floor(Math.random() * 9) + 1;
+                lastDigits = `${d}${d}${d}${d}`;
+                pattern = `Квадро ${lastDigits}`;
+            } else if (pRoll < 0.35) {
+                const ab = Math.floor(10 + Math.random() * 89);
+                const ba = ab.toString().split('').reverse().join('');
+                lastDigits = `${ab}${ba}`;
+                pattern = `Зеркало ${lastDigits}`;
+            } else {
+                lastDigits = String(Math.floor(1000 + Math.random() * 9000));
+            }
+
+            const prefix = (bank.paySystem === 'MIR') ? '2202' : '4532';
+            const mid1 = String(Math.floor(1000 + Math.random() * 9000));
+            const mid2 = String(Math.floor(1000 + Math.random() * 9000));
+            const number = `${prefix} •••• •••• ${lastDigits}`;
+            const fullNumber = `${prefix} ${mid1} ${mid2} ${lastDigits}`;
+            const expMonth = String(Math.floor(1 + Math.random() * 12)).padStart(2, '0');
+            const expYear = String(Math.floor(28 + Math.random() * 5));
+            const exp = `${expMonth}/${expYear}`;
+
+            return {
+                id: Date.now() + Math.floor(Math.random() * 1000),
+                bank: bank.name,
+                number: number,
+                fullNumber: fullNumber,
+                material: mat.name,
+                materialId: mat.id,
+                paySystem: bank.paySystem,
+                pattern: pattern,
+                exp: exp,
+                value: value
+            };
+        }
+
+        /* INITIALIZATION */
+        window.addEventListener('DOMContentLoaded', () => {
+            loadGame();
+
+            if (tg) {
+                tg.ready();
+                tg.expand();
+                try {
+                    tg.setHeaderColor('#050505');
+                    tg.setBackgroundColor('#050505');
+                } catch(e) {}
+                if (tg.initDataUnsafe?.user) {
+                    const u = tg.initDataUnsafe.user;
+                    currentUser.id = u.id || currentUser.id;
+                    currentUser.first_name = u.first_name || 'Игрок';
+                    currentUser.last_name = u.last_name || '';
+                    currentUser.username = u.username || `id${currentUser.id}`;
+                }
+            }
+
+            setupProfileUI();
+            updateBalanceDisplay();
+            setup3DCardTiltAndTap();
+            renderPawnInventory();
+            renderMarketplace();
+            startPassiveIncomeTimer();
+            startEnergyRegenTimer();
+            initRouletteReelVisual();
+            fetchRealLeaderboard();
+            checkPawnCooldown();
+
+            document.getElementById('modal-input-price')?.addEventListener('input', calculateModalFees);
+            setInterval(saveGame, 8000);
+            setInterval(checkPawnCooldown, 1000);
+        });
+
+        function setupProfileUI() {
+            const userNameEl = document.getElementById('user-name');
+            const userHandleEl = document.getElementById('user-handle');
+            const fullName = `${currentUser.first_name} ${currentUser.last_name}`.trim();
+            userNameEl.innerText = fullName;
+            userHandleEl.innerText = currentUser.username ? `@${currentUser.username}` : `@id${currentUser.id}`;
+
+            // Update main card on start
+            if (gameState.inventory.length > 0) {
+                updateMainCardVisual(gameState.inventory[0]);
+            }
+            updatePrefixUI();
+        }
+
+        function updatePrefixUI() {
+            const badge = document.getElementById('user-prefix-badge');
+            const leaderBadge = document.getElementById('leader-my-prefix');
+            if (currentUser.prefixText) {
+                badge.innerText = currentUser.prefixText;
+                badge.className = `text-[9px] font-mono px-1.5 py-0.2 rounded font-bold ${currentUser.prefixCss}`;
+                badge.classList.remove('hidden');
+
+                if (leaderBadge) {
+                    leaderBadge.innerText = currentUser.prefixText;
+                    leaderBadge.className = `text-[8px] font-mono px-1 py-0.2 rounded font-bold ${currentUser.prefixCss}`;
+                    leaderBadge.classList.remove('hidden');
+                }
+            } else {
+                badge.classList.add('hidden');
+                if (leaderBadge) leaderBadge.classList.add('hidden');
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast-box');
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 2300);
+        }
+
+        function updateBalanceDisplay() {
+            document.getElementById('user-balance').innerText = gameState.balance.toFixed(4);
+            document.getElementById('stat-bonus-mult').innerText = `x${gameState.incomeMultiplier.toFixed(2)}`;
+            document.getElementById('stat-per-click').innerText = `+${(gameState.clickPower * gameState.incomeMultiplier).toFixed(5)}`;
+            document.getElementById('stat-passive').innerText = `+${(gameState.passivePower * gameState.incomeMultiplier).toFixed(4)}/с`;
+            syncMyProfileToRealLeaderboard();
+        }
+
+        /* 3D TILT EFFECT & TAP FOR MAIN CARD */
+        function setup3DCardTiltAndTap() {
+            const card = document.getElementById('main-interactive-card');
+
+            // 3D Tilt on Mouse Move
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotX = ((y - centerY) / centerY) * -12;
+                const rotY = ((x - centerX) / centerX) * 12;
+                card.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+            });
+
+            // Tap Mining
+            const handleTap = (clientX, clientY) => {
+                if (currentUser.isBanned) return;
+                if (gameState.energy < 1) {
+                    showToast('⚡ Нет энергии!');
+                    triggerHaptic('error');
+                    return;
+                }
+                gameState.energy -= 1;
+                gameState.totalTaps += 1;
+                const earned = gameState.clickPower * gameState.incomeMultiplier;
+                gameState.balance += earned;
+
+                audio.tap();
+                triggerHaptic('light');
+
+                updateEnergyUI();
+                updateBalanceDisplay();
+                createFloatingTapAnimation(clientX, clientY, `+${earned.toFixed(5)}`);
+            };
+
+            card.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                for (let i = 0; i < e.touches.length; i++) {
+                    handleTap(e.touches[i].clientX, e.touches[i].clientY);
+                }
+            }, { passive: false });
+
+            card.addEventListener('click', (e) => handleTap(e.clientX, e.clientY));
+
+            // Upgrades
+            document.getElementById('buy-click-upg').addEventListener('click', () => {
+                if (gameState.balance >= gameState.clickUpgradeCost) {
+                    gameState.balance -= gameState.clickUpgradeCost;
+                    gameState.clickLvl += 1;
+                    gameState.clickPower += 0.00002;
+                    gameState.clickUpgradeCost *= 1.85;
+                    document.getElementById('click-lvl-badge').innerText = `L${gameState.clickLvl}`;
+                    document.getElementById('click-upg-cost').innerText = gameState.clickUpgradeCost.toFixed(4);
+                    audio.win();
+                    triggerHaptic('success');
+                    updateBalanceDisplay();
+                    saveGame();
+                } else showToast('Недостаточно TKN!');
+            });
+
+            document.getElementById('buy-passive-upg').addEventListener('click', () => {
+                if (gameState.balance >= gameState.passiveUpgradeCost) {
+                    gameState.balance -= gameState.passiveUpgradeCost;
+                    gameState.passiveLvl += 1;
+                    gameState.passivePower += 0.0005;
+                    gameState.passiveUpgradeCost *= 2.2;
+                    document.getElementById('passive-lvl-badge').innerText = `L${gameState.passiveLvl}`;
+                    document.getElementById('passive-upg-cost').innerText = gameState.passiveUpgradeCost.toFixed(4);
+                    audio.win();
+                    triggerHaptic('success');
+                    updateBalanceDisplay();
+                    saveGame();
+                } else showToast('Недостаточно TKN!');
+            });
+
+            document.getElementById('buy-energy-upg').addEventListener('click', () => {
+                if (gameState.balance >= gameState.energyUpgradeCost) {
+                    gameState.balance -= gameState.energyUpgradeCost;
+                    gameState.energyLvl += 1;
+                    gameState.energyMax += 250;
+                    gameState.energy = gameState.energyMax;
+                    gameState.energyUpgradeCost *= 2.0;
+                    document.getElementById('energy-lvl-badge').innerText = `L${gameState.energyLvl}`;
+                    document.getElementById('energy-upg-cost').innerText = gameState.energyUpgradeCost.toFixed(4);
+                    audio.win();
+                    triggerHaptic('success');
+                    updateEnergyUI();
+                    updateBalanceDisplay();
+                    saveGame();
+                } else showToast('Недостаточно TKN!');
+            });
+
+            document.getElementById('buy-mult-upg').addEventListener('click', () => {
+                if (gameState.balance >= gameState.multUpgradeCost) {
+                    gameState.balance -= gameState.multUpgradeCost;
+                    gameState.multLvl += 1;
+                    gameState.incomeMultiplier += 0.05;
+                    gameState.multUpgradeCost *= 2.4;
+                    document.getElementById('mult-lvl-badge').innerText = `L${gameState.multLvl}`;
+                    document.getElementById('mult-upg-cost').innerText = gameState.multUpgradeCost.toFixed(4);
+                    audio.win();
+                    triggerHaptic('success');
+                    updateBalanceDisplay();
+                    saveGame();
+                } else showToast('Недостаточно TKN!');
+            });
+        }
+
+        function updateMainCardVisual(card) {
+            const el = document.getElementById('main-interactive-card');
+            el.className = `physical-card ${card.materialId === 'metal' ? 'mat-metal-real' : 'mat-plastic-real'} p-5 flex flex-col justify-between`;
+            document.getElementById('main-card-bank').innerText = card.bank.toUpperCase();
+            document.getElementById('main-card-number').innerText = card.number;
+            document.getElementById('main-card-exp').innerText = card.exp;
+            document.getElementById('main-card-holder').innerText = currentUser.username.toUpperCase();
+        }
+
+        function createFloatingTapAnimation(clientX, clientY, text) {
+            const container = document.getElementById('tab-tap');
+            const rect = container.getBoundingClientRect();
+            const x = clientX ? (clientX - rect.left) : (rect.width / 2);
+            const y = clientY ? (clientY - rect.top) : (rect.height / 3);
+
+            const el = document.createElement('div');
+            el.className = 'tap-float-num';
+            el.style.left = `${x - 20}px`;
+            el.style.top = `${y - 15}px`;
+            el.innerText = text;
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 600);
+        }
+
+        function updateEnergyUI() {
+            document.getElementById('energy-current').innerText = Math.floor(gameState.energy);
+            document.getElementById('energy-max').innerText = gameState.energyMax;
+            const pct = Math.max(0, Math.min(100, (gameState.energy / gameState.energyMax) * 100));
+            document.getElementById('energy-bar').style.width = `${pct}%`;
+        }
+
+        function startEnergyRegenTimer() {
+            setInterval(() => {
+                if (gameState.energy < gameState.energyMax) {
+                    gameState.energy = Math.min(gameState.energyMax, gameState.energy + 3);
+                    updateEnergyUI();
+                }
+            }, 1000);
+        }
+
+        function startPassiveIncomeTimer() {
+            setInterval(() => {
+                if (gameState.passivePower > 0 && !currentUser.isBanned) {
+                    gameState.balance += gameState.passivePower * gameState.incomeMultiplier;
+                    updateBalanceDisplay();
+                }
+            }, 1000);
+        }
+
+        function useFullEnergyBoost() {
+            const now = Date.now();
+            if (now - gameState.lastBoostTime < 60000) {
+                const rem = Math.ceil((60000 - (now - gameState.lastBoostTime)) / 1000);
+                showToast(`⏳ Подождите ${rem}с`);
+                return;
+            }
+            gameState.lastBoostTime = now;
+            gameState.energy = gameState.energyMax;
+            updateEnergyUI();
+            audio.win();
+            triggerHaptic('success');
+            showToast('⚡ Энергия восстановлена!');
+
+            const timerSpan = document.getElementById('boost-timer');
+            let rem = 60;
+            const cd = setInterval(() => {
+                rem--;
+                if (rem <= 0) {
+                    clearInterval(cd);
+                    timerSpan.innerText = 'Готово';
+                } else timerSpan.innerText = `${rem}с`;
+            }, 1000);
+        }
+
+        /* NAVIGATION */
+        function switchTab(tabName) {
+            triggerHaptic('light');
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('text-accentGreen');
+                el.classList.add('text-slate-500');
+            });
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            const activeNav = document.getElementById(`nav-${tabName}`);
+            activeNav.classList.remove('text-slate-500');
+            activeNav.classList.add('text-accentGreen');
+
+            if (tabName === 'pawn') renderPawnInventory();
+            if (tabName === 'market') renderMarketplace();
+            if (tabName === 'leaderboard') fetchRealLeaderboard();
+        }
+
+        /* ROULETTE REEL SYSTEM (RISK OF PROFIT OR LOSS) */
+        let isSpinning = false;
+        function initRouletteReelVisual() {
+            const track = document.getElementById('roulette-track');
+            track.innerHTML = '';
+            for (let i = 0; i < 30; i++) {
+                const card = generateBankCard('plastic');
+                const item = document.createElement('div');
+                item.className = 'w-24 h-16 rounded-xl dark-panel flex-shrink-0 flex flex-col items-center justify-center p-1.5 text-center';
+                item.innerHTML = `
+                    <div class="text-[9px] font-bold text-slate-200 truncate w-full">${card.bank}</div>
+                    <div class="text-[8px] font-mono ${card.materialId === 'metal' ? 'text-accentGreen font-bold' : 'text-slate-500'} truncate w-full">${card.material}</div>
+                `;
+                track.appendChild(item);
+            }
+        }
+
+        function startRouletteSpin(cost, tier) {
+            if (isSpinning) return;
+            if (gameState.balance < cost) {
+                showToast('❌ Недостаточно средств!');
+                triggerHaptic('error');
+                return;
+            }
+
+            gameState.balance -= cost;
+            updateBalanceDisplay();
+            isSpinning = true;
+            triggerHaptic('medium');
+
+            const winningCard = generateBankCard(tier);
+            const isProfit = winningCard.value >= cost;
+
+            const track = document.getElementById('roulette-track');
+            track.style.transition = 'none';
+            track.style.transform = 'translateX(0px)';
+            track.innerHTML = '';
+
+            const targetIndex = 25;
+            for (let i = 0; i < 35; i++) {
+                const card = (i === targetIndex) ? winningCard : generateBankCard(tier);
+                const item = document.createElement('div');
+                item.className = `w-24 h-16 rounded-xl dark-panel border ${i === targetIndex ? 'border-accentGreen' : 'border-panelBorder'} flex-shrink-0 flex flex-col items-center justify-center p-1.5 text-center`;
+                item.innerHTML = `
+                    <div class="text-[9px] font-bold text-slate-200 truncate w-full">${card.bank}</div>
+                    <div class="text-[8px] font-mono ${card.materialId === 'metal' ? 'text-accentGreen font-bold' : 'text-slate-500'} truncate w-full">${card.material}</div>
+                `;
+                track.appendChild(item);
+            }
+
+            track.getBoundingClientRect();
+            const cardWidth = 106;
+            const containerWidth = track.parentElement.offsetWidth;
+            const offset = (targetIndex * cardWidth) - (containerWidth / 2) + (cardWidth / 2) + (Math.random() * 14 - 7);
+
+            setTimeout(() => {
+                track.style.transition = 'transform 4.5s cubic-bezier(0.12, 0.8, 0.22, 1)';
+                track.style.transform = `translateX(-${offset}px)`;
+            }, 20);
+
+            setTimeout(() => {
+                isSpinning = false;
+                if (isProfit) audio.win(); else audio.fail();
+                triggerHaptic(isProfit ? 'success' : 'error');
+
+                const previewEl = document.getElementById('drop-card-preview-element');
+                previewEl.className = `${winningCard.materialId === 'metal' ? 'mat-metal-real' : 'mat-plastic-real'} w-full rounded-xl p-4 space-y-3 relative`;
+                
+                document.getElementById('drop-bank-name').innerText = winningCard.bank;
+                document.getElementById('drop-card-number').innerText = winningCard.number;
+                document.getElementById('drop-pay-system').innerText = winningCard.paySystem;
+                document.getElementById('drop-material-badge').innerText = winningCard.material;
+                document.getElementById('drop-value').innerText = `~${winningCard.value.toFixed(2)} TKN`;
+
+                const profitDiff = (winningCard.value - cost).toFixed(2);
+                const profitEl = document.getElementById('drop-profit-status');
+                if (isProfit) {
+                    profitEl.innerText = `🔥 ОКУП (+${profitDiff} TKN)`;
+                    profitEl.className = 'text-[10px] font-mono font-bold text-accentGreen';
+                } else {
+                    profitEl.innerText = `📉 НЕОКУП (${profitDiff} TKN)`;
+                    profitEl.className = 'text-[10px] font-mono font-bold text-red-500';
+                }
+
+                gameState.inventory.unshift(winningCard);
+                updateMainCardVisual(winningCard);
+                saveGame();
+                renderPawnInventory();
+                showToast(`Выпала карта: ${winningCard.material} (~${winningCard.value.toFixed(2)} TKN)`);
+            }, 4600);
+        }
+
+        /* PAWNSHOP & MULTI-SELECT & 5-MIN COOLDOWN FIX */
+        function checkPawnCooldown() {
+            const now = Date.now();
+            const cooldownBanner = document.getElementById('pawn-cooldown-banner');
+            const normalBox = document.getElementById('pawn-normal-box');
+            const bargainPanel = document.getElementById('pawn-bargain-panel');
+
+            if (gameState.pawnCooldownUntil && gameState.pawnCooldownUntil > now) {
+                const remSec = Math.ceil((gameState.pawnCooldownUntil - now) / 1000);
+                const mins = String(Math.floor(remSec / 60)).padStart(2, '0');
+                const secs = String(remSec % 60).padStart(2, '0');
+                
+                cooldownBanner.classList.remove('hidden');
+                document.getElementById('pawn-cooldown-timer').innerText = `${mins}:${secs}`;
+                normalBox.classList.add('hidden');
+                bargainPanel.classList.add('hidden');
+                
+                document.querySelectorAll('.deal-btn').forEach(b => b.disabled = true);
+                return true;
+            } else {
+                cooldownBanner.classList.add('hidden');
+                normalBox.classList.remove('hidden');
+                document.querySelectorAll('.deal-btn').forEach(b => b.disabled = false);
+                return false;
+            }
+        }
+
+        function renderPawnInventory() {
+            const container = document.getElementById('pawn-inventory-list');
+            const countBadge = document.getElementById('inv-count-badge');
+            if (countBadge) countBadge.innerText = gameState.inventory.length;
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            if (gameState.inventory.length === 0) {
+                container.innerHTML = `
+                    <div class="dark-panel p-4 text-center text-xs text-slate-500 rounded-xl">
+                        У вас нет карт в инвентаре.
+                    </div>
+                `;
+                document.getElementById('pawn-bargain-panel').classList.add('hidden');
+                updateSelectedSummary();
+                return;
+            }
+
+            gameState.inventory.forEach(card => {
+                const isSelected = selectedPawnCardIds.has(card.id);
+                const item = document.createElement('div');
+                item.className = `dark-panel p-2.5 rounded-xl border ${isSelected ? 'border-accentGreen' : 'border-panelBorder'} flex justify-between items-center cursor-pointer transition-all`;
+                
+                item.innerHTML = `
+                    <div class="flex items-center space-x-2.5">
+                        <input type="checkbox" ${isSelected ? 'checked' : ''} class="w-4 h-4 rounded accent-accentGreen cursor-pointer" onclick="event.stopPropagation(); toggleCardSelection(${card.id})" />
+                        <div>
+                            <div class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                                ${card.bank} <span class="text-[9px] font-mono text-slate-500">(${card.paySystem})</span>
+                            </div>
+                            <div class="text-[10px] text-slate-400 font-mono">
+                                ${card.number} • <span class="${card.materialId === 'metal' ? 'text-accentGreen font-bold' : 'text-slate-500'}">${card.material}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-mono font-bold text-accentGreen">~${card.value.toFixed(2)} TKN</div>
+                        <div class="text-[9px] text-slate-500 font-mono">${card.pattern || 'Стандарт'}</div>
+                    </div>
+                `;
+
+                item.onclick = () => toggleCardSelection(card.id);
+                container.appendChild(item);
+            });
+
+            updateSelectedSummary();
+        }
+
+        function toggleCardSelection(cardId) {
+            if (selectedPawnCardIds.has(cardId)) {
+                selectedPawnCardIds.delete(cardId);
+            } else {
+                selectedPawnCardIds.add(cardId);
+            }
+            triggerHaptic('light');
+            renderPawnInventory();
+        }
+
+        function toggleSelectAllCards() {
+            if (selectedPawnCardIds.size === gameState.inventory.length) {
+                selectedPawnCardIds.clear();
+            } else {
+                gameState.inventory.forEach(c => selectedPawnCardIds.add(c.id));
+            }
+            triggerHaptic('light');
+            renderPawnInventory();
+        }
+
+        function selectOnlyPlasticCards() {
+            selectedPawnCardIds.clear();
+            gameState.inventory.filter(c => c.materialId === 'plastic').forEach(c => selectedPawnCardIds.add(c.id));
+            triggerHaptic('light');
+            renderPawnInventory();
+        }
+
+        function clearSelectedCards() {
+            selectedPawnCardIds.clear();
+            triggerHaptic('light');
+            renderPawnInventory();
+        }
+
+        function updateSelectedSummary() {
+            const count = selectedPawnCardIds.size;
+            let totalVal = 0;
+            gameState.inventory.filter(c => selectedPawnCardIds.has(c.id)).forEach(c => totalVal += c.value);
+
+            const summaryEl = document.getElementById('selected-summary-text');
+            if (summaryEl) {
+                summaryEl.innerText = `Выбрано: ${count} карт (~${totalVal.toFixed(2)} TKN)`;
+            }
+
+            const bargainPanel = document.getElementById('pawn-bargain-panel');
+            if (count > 0 && !checkPawnCooldown()) {
+                bargainPanel.classList.remove('hidden');
+                document.getElementById('pawn-base-price').innerText = `${totalVal.toFixed(2)} TKN`;
+                document.getElementById('pawn-selected-count-badge').innerText = `${count} шт.`;
+
+                document.getElementById('pawn-opt-1').innerText = `${(totalVal * 1.0).toFixed(2)} TKN`;
+                document.getElementById('pawn-opt-2').innerText = `${(totalVal * 1.15).toFixed(2)} TKN`;
+                document.getElementById('pawn-opt-3').innerText = `${(totalVal * 1.35).toFixed(2)} TKN`;
+                document.getElementById('pawn-opt-4').innerText = `${(totalVal * 1.70).toFixed(2)} TKN`;
+            } else {
+                bargainPanel.classList.add('hidden');
+            }
+        }
+
+        let isDealing = false;
+        function executePawnDeal(multiplier, successChance) {
+            if (isDealing) return;
+            if (checkPawnCooldown()) {
+                showToast('⏳ Скупщик заблокирован на 5 минут!');
+                return;
+            }
+            if (selectedPawnCardIds.size === 0) {
+                showToast('Выберите хотя бы одну карту!');
+                return;
+            }
+
+            isDealing = true;
+            document.querySelectorAll('.deal-btn').forEach(b => b.disabled = true);
+
+            const selectedCards = gameState.inventory.filter(c => selectedPawnCardIds.has(c.id));
+            let totalBaseVal = 0;
+            selectedCards.forEach(c => totalBaseVal += c.value);
+
+            const roll = Math.random() * 100;
+            const finalPayout = totalBaseVal * multiplier;
+
+            if (roll <= successChance) {
+                gameState.balance += finalPayout;
+                gameState.inventory = gameState.inventory.filter(c => !selectedPawnCardIds.has(c.id));
+                selectedPawnCardIds.clear();
+
+                audio.win();
+                triggerHaptic('success');
+                updateBalanceDisplay();
+                renderPawnInventory();
+                showToast(`✅ Сделка закрыта: +${finalPayout.toFixed(2)} TKN!`);
+                saveGame();
+                isDealing = false;
+            } else {
+                audio.fail();
+                triggerHaptic('error');
+
+                gameState.pawnCooldownUntil = Date.now() + (5 * 60 * 1000); // 5 MINUTES EXACT LOCK
+                saveGame();
+                checkPawnCooldown();
+
+                showToast('❌ Скупщик отказался! Торги заблокированы на 5 минут.');
+                isDealing = false;
+            }
+        }
+
+        /* MARKETPLACE */
+        function renderMarketplace() {
+            const container = document.getElementById('market-listings-container');
+            if (!container) return;
+            container.innerHTML = '';
+            document.getElementById('market-count').innerText = `${gameState.marketListings.length} лотов`;
+
+            if (gameState.marketListings.length === 0) {
+                container.innerHTML = `<div class="dark-panel p-4 text-center text-xs text-slate-500 rounded-xl">Лотов пока нет</div>`;
+                return;
+            }
+
+            gameState.marketListings.forEach(listing => {
+                const card = document.createElement('div');
+                card.className = 'dark-panel p-2.5 rounded-xl border border-panelBorder flex justify-between items-center';
+                
+                const btn = listing.isMine ? `
+                    <button onclick="cancelMarketListing(${listing.id})" class="px-2.5 py-1 bg-red-950 border border-red-800 text-red-300 rounded-lg text-xs font-bold active:scale-95">Снять</button>
+                ` : `
+                    <button onclick="buyMarketListing(${listing.id})" class="green-btn px-3 py-1 rounded-lg text-xs active:scale-95">Купить</button>
+                `;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="text-xs font-bold text-slate-200">${listing.bank} • <span class="${listing.material === 'Металл' ? 'text-accentGreen font-bold' : 'text-slate-500'}">${listing.material}</span></div>
+                        <div class="text-[10px] text-slate-500 font-mono">${listing.number} • ${listing.sellerName}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-mono font-bold text-accentGreen mb-1">${listing.price.toFixed(2)} TKN</div>
+                        ${btn}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function buyMarketListing(id) {
+            const l = gameState.marketListings.find(m => m.id === id);
+            if (!l) return;
+            if (gameState.balance >= l.price) {
+                gameState.balance -= l.price;
+                const matDef = materialsList.find(m => m.name === l.material) || materialsList[0];
+                gameState.inventory.unshift({
+                    id: Date.now(),
+                    bank: l.bank,
+                    number: l.number,
+                    material: l.material,
+                    materialId: matDef.id,
+                    paySystem: 'VISA',
+                    pattern: 'P2P',
+                    exp: '12/31',
+                    value: l.price * 0.8
+                });
+                gameState.marketListings = gameState.marketListings.filter(m => m.id !== id);
+                audio.win();
+                triggerHaptic('success');
+                updateBalanceDisplay();
+                renderMarketplace();
+                renderPawnInventory();
+                saveGame();
+                showToast(`Куплена карта: ${l.bank}!`);
+            } else showToast('Недостаточно TKN!');
+        }
+
+        function cancelMarketListing(id) {
+            const l = gameState.marketListings.find(m => m.id === id);
+            if (!l) return;
+            gameState.marketListings = gameState.marketListings.filter(m => m.id !== id);
+            const matDef = materialsList.find(m => m.name === l.material) || materialsList[0];
+            gameState.inventory.unshift({
+                id: Date.now(),
+                bank: l.bank,
+                number: l.number,
+                material: l.material,
+                materialId: matDef.id,
+                paySystem: 'VISA',
+                pattern: 'Возврат',
+                exp: '12/31',
+                value: l.price * 0.8
+            });
+            renderMarketplace();
+            renderPawnInventory();
+            saveGame();
+            showToast('Лот возвращен в инвентарь!');
+        }
+
+        function openCreateListingModal() {
+            if (gameState.inventory.length === 0) {
+                showToast('У вас нет карт!');
+                return;
+            }
+            const select = document.getElementById('modal-select-card');
+            select.innerHTML = '';
+            gameState.inventory.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.innerText = `${c.bank} - ${c.material} (${c.value} TKN)`;
+                select.appendChild(opt);
+            });
+            document.getElementById('modal-create-listing').classList.remove('hidden');
+            calculateModalFees();
+        }
+
+        function calculateModalFees() {
+            const price = parseFloat(document.getElementById('modal-input-price').value) || 0;
+            const fee = price * 0.08;
+            const rec = Math.max(0, price - fee);
+            document.getElementById('modal-fee-calc').innerText = `-${fee.toFixed(2)} TKN`;
+            document.getElementById('modal-receive-calc').innerText = `${rec.toFixed(2)} TKN`;
+        }
+
+        function submitP2PListing() {
+            const cardId = parseInt(document.getElementById('modal-select-card').value);
+            const price = parseFloat(document.getElementById('modal-input-price').value);
+            if (!price || price <= 0) {
+                showToast('Укажите корректную цену!');
+                return;
+            }
+            const card = gameState.inventory.find(c => c.id === cardId);
+            if (!card) return;
+
+            gameState.marketListings.unshift({
+                id: Date.now(),
+                sellerName: currentUser.username ? `@${currentUser.username}` : `${currentUser.first_name}`,
+                bank: card.bank,
+                number: card.number,
+                material: card.material,
+                price: price,
+                isMine: true
+            });
+
+            gameState.inventory = gameState.inventory.filter(c => c.id !== cardId);
+            selectedPawnCardIds.delete(cardId);
+            closeModal('modal-create-listing');
+            renderMarketplace();
+            renderPawnInventory();
+            saveGame();
+            showToast('Лот опубликован!');
+        }
+
+        /* REAL LIVE LEADERBOARD WITH REAL ADS WALL */
+        const SHARED_KEY = 'carddrop_black_leaderboard';
+
+        function getGlobalStorageData() {
+            try {
+                const raw = localStorage.getItem(SHARED_KEY);
+                if (raw) return JSON.parse(raw);
+            } catch(e) {}
+            return [
+                {
+                    id: '101',
+                    name: 'Alex_Metal',
+                    username: 'alex_trader',
+                    balance: 540.20,
+                    prefixText: 'VIP',
+                    prefixCss: 'bg-emerald-500 text-black',
+                    isBanned: false,
+                    ad: { cardBank: 'T-Bank Metal', material: 'Металл', number: '4532 •••• •••• 7777', price: 120.0, text: 'Продам редкий Металл 7777!' }
+                },
+                {
+                    id: '102',
+                    name: 'Elena_Crypto',
+                    username: 'elena_dubai',
+                    balance: 310.50,
+                    prefixText: 'Тестер',
+                    prefixCss: 'bg-blue-600 text-white',
+                    isBanned: false,
+                    ad: null
+                }
+            ];
+        }
+
+        function setGlobalStorageData(data) {
+            try {
+                localStorage.setItem(SHARED_KEY, JSON.stringify(data));
+            } catch(e) {}
+        }
+
+        async function fetchRealLeaderboard() {
+            let players = [];
+            try {
+                const res = await fetch('/api/leaderboard', { cache: 'no-store' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.players) players = data.players;
+                }
+            } catch(e) {}
+
+            if (!players || players.length === 0) {
+                players = getGlobalStorageData();
+            }
+
+            renderRealLeaderboardList(players);
+        }
+
+        async function syncMyProfileToRealLeaderboard() {
+            const handle = currentUser.username ? currentUser.username.replace('@', '') : `user${currentUser.id}`;
+            const userFullName = `${currentUser.first_name} ${currentUser.last_name}`.trim();
+
+            const myProfileData = {
+                id: String(currentUser.id),
+                name: userFullName,
+                username: handle,
+                balance: gameState.balance,
+                prefixText: currentUser.prefixText,
+                prefixCss: currentUser.prefixCss,
+                isBanned: currentUser.isBanned,
+                ad: gameState.myLeaderboardAd
+            };
+
+            try {
+                fetch('/api/player/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(myProfileData)
+                }).catch(() => {});
+            } catch(e) {}
+
+            let all = getGlobalStorageData();
+            const idx = all.findIndex(p => String(p.id) === String(currentUser.id));
+            if (idx >= 0) all[idx] = { ...all[idx], ...myProfileData };
+            else all.push(myProfileData);
+
+            all.sort((a, b) => b.balance - a.balance);
+            setGlobalStorageData(all);
+            renderRealLeaderboardList(all);
+        }
+
+        function renderRealLeaderboardList(playersList) {
+            const list = document.getElementById('leaderboard-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            const handle = currentUser.username ? currentUser.username.replace('@', '') : `user${currentUser.id}`;
+            const userFullName = `${currentUser.first_name} ${currentUser.last_name}`.trim();
+
+            let all = [...playersList];
+            if (!all.some(p => String(p.id) === String(currentUser.id))) {
+                all.push({
+                    id: String(currentUser.id),
+                    name: userFullName,
+                    username: handle,
+                    balance: gameState.balance,
+                    prefixText: currentUser.prefixText,
+                    prefixCss: currentUser.prefixCss,
+                    isBanned: currentUser.isBanned,
+                    ad: gameState.myLeaderboardAd
+                });
+            } else {
+                const u = all.find(p => String(p.id) === String(currentUser.id));
+                u.balance = gameState.balance;
+                u.ad = gameState.myLeaderboardAd;
+                u.prefixText = currentUser.prefixText;
+                u.prefixCss = currentUser.prefixCss;
+                u.isBanned = currentUser.isBanned;
+            }
+
+            all.sort((a, b) => b.balance - a.balance);
+
+            const userRank = all.findIndex(p => String(p.id) === String(currentUser.id)) + 1;
+            document.getElementById('leader-my-rank').innerText = `#${userRank}`;
+            document.getElementById('leader-my-name').innerText = userFullName;
+            document.getElementById('leader-my-score').innerText = `${gameState.balance.toFixed(2)} TKN`;
+
+            const myAdBox = document.getElementById('leader-my-ad-content');
+            const adLabel = document.getElementById('btn-ad-label');
+            if (gameState.myLeaderboardAd) {
+                myAdBox.classList.remove('hidden');
+                myAdBox.innerHTML = `
+                    <div class="flex justify-between items-center font-bold text-accentGreen">
+                        <span>📌 ${gameState.myLeaderboardAd.cardBank} (${gameState.myLeaderboardAd.material})</span>
+                        <span>${gameState.myLeaderboardAd.price} TKN</span>
+                    </div>
+                    <div class="text-slate-300 mt-0.5">"${gameState.myLeaderboardAd.text}"</div>
+                `;
+                adLabel.innerText = 'Изменить объявление';
+            } else {
+                myAdBox.classList.add('hidden');
+                adLabel.innerText = 'Выставить объявление';
+            }
+
+            all.forEach((player, idx) => {
+                const isUser = String(player.id) === String(currentUser.id);
+                const isBanned = player.isBanned;
+
+                const row = document.createElement('div');
+                row.className = `dark-panel p-2.5 rounded-xl border ${isUser ? 'border-accentGreen' : 'border-panelBorder'} space-y-2 ${isBanned ? 'opacity-40' : ''}`;
+
+                let rankBadge = `#${idx + 1}`;
+                if (idx === 0) rankBadge = '🥇';
+                if (idx === 1) rankBadge = '🥈';
+                if (idx === 2) rankBadge = '🥉';
+
+                let adSnippet = '';
+                if (player.ad && !isBanned) {
+                    const isOtherAd = !isUser;
+                    adSnippet = `
+                        <div class="text-[10px] bg-black p-2 rounded-lg border border-panelBorder text-slate-300 flex justify-between items-center gap-2">
+                            <div>
+                                <div class="text-accentGreen font-bold flex items-center gap-1">
+                                    <i class="fa-solid fa-bullhorn text-[9px]"></i> ${player.ad.cardBank} • <span class="${player.ad.material === 'Металл' ? 'text-accentGreen font-bold' : 'text-slate-500'}">${player.ad.material}</span>
+                                </div>
+                                <div class="text-slate-400 italic">"${player.ad.text}"</div>
+                            </div>
+                            <div class="text-right flex-shrink-0">
+                                <div class="text-accentGreen font-bold font-mono mb-1">${player.ad.price} TKN</div>
+                                ${isOtherAd ? `
+                                    <button onclick="buyLeaderboardCardAd('${player.id}')" class="green-btn px-2 py-0.5 rounded text-[9px]">
+                                        Купить
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const prefixHtml = player.prefixText ? `<span class="text-[8px] font-mono px-1 py-0.2 rounded font-bold ${player.prefixCss}">${player.prefixText}</span>` : '';
+                const banHtml = isBanned ? '<span class="text-[8px] font-mono px-1 py-0.2 rounded font-bold bg-red-600 text-white">ЗАБАНЕН</span>' : '';
+
+                row.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="font-mono font-bold text-xs w-6 text-center text-slate-400">${rankBadge}</div>
+                            <div class="w-7 h-7 rounded bg-black border border-panelBorder flex items-center justify-center font-bold text-xs text-slate-200">
+                                ${player.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-slate-100 flex items-center gap-1">
+                                    ${player.name} ${prefixHtml} ${banHtml} ${isUser ? '<span class="text-[8px] bg-accentGreen text-black px-1 rounded font-bold">ВЫ</span>' : ''}
+                                </div>
+                                <div class="text-[9px] text-slate-500 font-mono">@${player.username}</div>
+                            </div>
+                        </div>
+                        <div class="font-mono font-bold text-xs text-accentGreen">
+                            ${parseFloat(player.balance).toFixed(2)} TKN
+                        </div>
+                    </div>
+                    ${adSnippet}
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        function openPostAdModal() {
+            if (gameState.inventory.length === 0) {
+                showToast('У вас нет карт для выставления!');
+                return;
+            }
+            const select = document.getElementById('ad-select-card');
+            select.innerHTML = '';
+            gameState.inventory.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.innerText = `${c.bank} - ${c.material} (${c.number})`;
+                select.appendChild(opt);
+            });
+
+            if (gameState.myLeaderboardAd) {
+                document.getElementById('ad-input-price').value = gameState.myLeaderboardAd.price || 50;
+                document.getElementById('ad-input-text').value = gameState.myLeaderboardAd.text || '';
+            }
+            document.getElementById('modal-post-ad').classList.remove('hidden');
+        }
+
+        function submitLeaderboardAd() {
+            const cardId = parseInt(document.getElementById('ad-select-card').value);
+            const price = parseFloat(document.getElementById('ad-input-price').value) || 30.0;
+            const text = document.getElementById('ad-input-text').value.trim();
+            const card = gameState.inventory.find(c => c.id === cardId);
+            if (!card) return;
+
+            gameState.myLeaderboardAd = {
+                cardId: card.id,
+                cardBank: card.bank,
+                material: card.material,
+                number: card.number,
+                price: price,
+                text: text || 'Моя карта выставлена в Зале Славы!'
+            };
+
+            closeModal('modal-post-ad');
+            saveGame();
+            syncMyProfileToRealLeaderboard();
+            showToast('✅ Объявление опубликовано!');
+        }
+
+        function removeLeaderboardAd() {
+            gameState.myLeaderboardAd = null;
+            closeModal('modal-post-ad');
+            saveGame();
+            syncMyProfileToRealLeaderboard();
+            showToast('Объявление удалено');
+        }
+
+        function buyLeaderboardCardAd(sellerId) {
+            let all = getGlobalStorageData();
+            const seller = all.find(p => String(p.id) === String(sellerId));
+            if (!seller || !seller.ad) return;
+
+            const cost = seller.ad.price;
+            if (gameState.balance < cost) {
+                showToast('❌ Недостаточно TKN!');
+                return;
+            }
+
+            gameState.balance -= cost;
+            const matDef = materialsList.find(m => m.name === seller.ad.material) || materialsList[0];
+            gameState.inventory.unshift({
+                id: Date.now(),
+                bank: seller.ad.cardBank,
+                number: seller.ad.number,
+                material: seller.ad.material,
+                materialId: matDef.id,
+                paySystem: 'VISA',
+                pattern: 'Лидерборд Лот',
+                exp: '12/30',
+                value: cost * 0.85
+            });
+
+            seller.balance += cost;
+            seller.ad = null;
+            setGlobalStorageData(all);
+
+            audio.win();
+            triggerHaptic('success');
+            updateBalanceDisplay();
+            renderPawnInventory();
+            renderRealLeaderboardList(all);
+            showToast(`🎉 Куплена карта у @${seller.username}!`);
+        }
+
+        /* PROMOCODES SYSTEM */
+        function applyPromocode() {
+            const code = document.getElementById('input-promocode').value.trim().toUpperCase();
+            if (!code) return;
+
+            if (gameState.redeemedPromocodes.includes(code)) {
+                showToast('❌ Промокод уже был использован!');
+                return;
+            }
+
+            if (code === 'DOLD30') {
+                gameState.balance += 150.0;
+                // Give free metal card
+                const bonusCard = generateBankCard('metal');
+                gameState.inventory.unshift(bonusCard);
+                gameState.redeemedPromocodes.push(code);
+                audio.win();
+                triggerHaptic('success');
+                updateBalanceDisplay();
+                renderPawnInventory();
+                saveGame();
+                showToast('🎁 Промокод DOLD30: +150 TKN и Металлическая Карта!');
+                document.getElementById('input-promocode').value = '';
+            } else if (code === 'START2026') {
+                gameState.balance += 50.0;
+                gameState.redeemedPromocodes.push(code);
+                audio.win();
+                triggerHaptic('success');
+                updateBalanceDisplay();
+                saveGame();
+                showToast('🎁 Промокод START2026: +50 TKN!');
+                document.getElementById('input-promocode').value = '';
+            } else if (code === 'CYBERFREE') {
+                gameState.balance += 25.0;
+                gameState.redeemedPromocodes.push(code);
+                audio.win();
+                triggerHaptic('success');
+                updateBalanceDisplay();
+                saveGame();
+                showToast('🎁 Промокод CYBERFREE: +25 TKN!');
+                document.getElementById('input-promocode').value = '';
+            } else {
+                showToast('❌ Неверный промокод!');
+            }
+        }
+
+        /* ADMIN PANEL (PASSWORD: 1190234) */
+        function verifyAdminPassword() {
+            const pass = document.getElementById('input-admin-pass').value.trim();
+            if (pass === '1190234') {
+                closeModal('modal-settings');
+                openAdminPanel();
+                document.getElementById('input-admin-pass').value = '';
+                showToast('👑 Доступ разрешен: Панель Администратора');
+            } else {
+                showToast('❌ Неверный пароль администратора!');
+            }
+        }
+
+        function openAdminPanel() {
+            renderAdminBanList();
+            document.getElementById('modal-admin-panel').classList.remove('hidden');
+        }
+
+        function adminGiveMoney(amount) {
+            gameState.balance += amount;
+            updateBalanceDisplay();
+            saveGame();
+            showToast(`✅ Начислено +${amount} TKN!`);
+        }
+
+        function adminSetPrefix(prefixName, prefixStyle) {
+            currentUser.prefixText = prefixName;
+            currentUser.prefixCss = prefixStyle;
+            updatePrefixUI();
+            syncMyProfileToRealLeaderboard();
+            showToast(`✅ Установлен префикс: [${prefixName}]`);
+        }
+
+        function renderAdminBanList() {
+            const container = document.getElementById('admin-players-ban-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            let all = getGlobalStorageData();
+            all.forEach(p => {
+                const row = document.createElement('div');
+                row.className = 'flex justify-between items-center p-2 bg-black rounded-lg border border-panelBorder text-xs';
+                
+                const isBan = p.isBanned;
+                row.innerHTML = `
+                    <div>
+                        <span class="font-bold text-white">${p.name}</span>
+                        <span class="text-[10px] text-slate-500 font-mono">(@${p.username})</span>
+                    </div>
+                    <button onclick="adminToggleBan('${p.id}')" class="px-2.5 py-1 ${isBan ? 'bg-emerald-600' : 'bg-red-600'} text-white font-bold rounded text-[10px] active:scale-95">
+                        ${isBan ? 'Разбанить' : 'Забанить'}
+                    </button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function adminToggleBan(playerId) {
+            let all = getGlobalStorageData();
+            const p = all.find(player => String(player.id) === String(playerId));
+            if (!p) return;
+
+            p.isBanned = !p.isBanned;
+            setGlobalStorageData(all);
+
+            // If banning current user
+            if (String(playerId) === String(currentUser.id)) {
+                currentUser.isBanned = p.isBanned;
+                if (currentUser.isBanned) {
+                    document.getElementById('ban-screen').classList.remove('hidden');
+                } else {
+                    document.getElementById('ban-screen').classList.add('hidden');
+                }
+            }
+
+            renderAdminBanList();
+            renderRealLeaderboardList(all);
+            showToast(`${p.name} ${p.isBanned ? 'забанен' : 'разбанен'}!`);
+        }
+
+        /* STORE (TELEGRAM STARS) */
+        function openStoreModal() {
+            document.getElementById('modal-store').classList.remove('hidden');
+            calculateStoreTotal();
+        }
+        function setStorePreset(amt) {
+            document.getElementById('store-custom-amount').value = amt;
+            calculateStoreTotal();
+        }
+        function calculateStoreTotal() {
+            const amt = Math.max(1, parseFloat(document.getElementById('store-custom-amount').value) || 1);
+            const stars = Math.round(amt * 0.5);
+            const usd = (amt * 0.01).toFixed(2);
+            document.getElementById('store-summary-tokens').innerText = `${amt.toFixed(2)} TKN`;
+            document.getElementById('store-summary-price').innerText = `⭐ ${stars} Stars ($${usd})`;
+        }
+        function payViaTelegramStars() {
+            const amt = Math.max(1, parseFloat(document.getElementById('store-custom-amount').value) || 1);
+            gameState.balance += amt;
+            closeModal('modal-store');
+            audio.win();
+            triggerHaptic('success');
+            updateBalanceDisplay();
+            saveGame();
+            showToast(`⭐ Зачислено +${amt} TKN!`);
+        }
+
+        /* MODALS */
+        function openSettingsModal() {
+            document.getElementById('modal-settings').classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
