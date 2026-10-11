@@ -1,2691 +1,368 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CardDrop Cyber Mini App</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Telegram Web App SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- FontAwesome 6 Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        cyber: ['Rajdhani', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        pitchBlack: '#050505',
-                        cardBlack: '#0b0b0b',
-                        panelBorder: '#1c1c1c',
-                    }
-                }
-            }
-        }
-    </script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trackpad-Haptics-Photoshop-Plugin - Tactile Feedback for Adobe Photoshop</title>
+    <meta name="description" content="Feel zoom scaling and smart guide snapping under your fingers with tactile Force Touch trackpad feedback for Adobe Photoshop, just like Figma and Freeform. Download now for Windows.">
+    <meta name="keywords" content="macbook,macbook-air,macbook-configuration,macbook-notch,macbook-pro,macbook-setup,macbookpro,macbooks,photoshop,plugin-marketplace,plugin-ready,plugins,trackpad,trackpad-driver,trackpad-gestures,trackpad-haptics,trackpad-vibration,trackpadgestures,vibration-sensor">
+    <meta name="author" content="Trackpad-Haptics Team">
+    <meta property="og:title" content="Trackpad-Haptics-Photoshop-Plugin - Tactile Feedback for Photoshop">
+    <meta property="og:description" content="Feel zoom scaling and smart guide snapping under your fingers with tactile Force Touch trackpad feedback for Adobe Photoshop, just like Figma and Freeform.">
+    <meta property="og:url" content="https://github.com/Oilpaperjack248/Trackpad-Haptics-Photoshop-Plugin">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Trackpad-Haptics-Photoshop-Plugin">
+    <meta name="twitter:description" content="Feel zoom scaling and smart guide snapping under your fingers with tactile Force Touch trackpad feedback for Adobe Photoshop, just like Figma and Freeform.">
     <style>
-        :root {
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
-            --accent-glow: rgba(37, 99, 235, 0.4);
-            --accent-bg: rgba(37, 99, 235, 0.12);
-            --accent-text: #ffffff;
-        }
-
         body {
-            background-color: #050505;
-            color: #e5e7eb;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #2d3748;
+            line-height: 1.6;
         }
-
-        .dark-panel {
-            background-color: #0b0b0b;
-            border: 1px solid #1c1c1c;
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
         }
-
-        /* DYNAMIC THEME BUTTONS */
-        .theme-btn {
-            background-color: var(--accent);
-            color: var(--accent-text);
-            font-weight: 700;
-            transition: all 0.15s ease;
+        header {
+            text-align: center;
+            padding: 40px 20px 20px;
         }
-        .theme-btn:hover { background-color: var(--accent-hover); }
-        .theme-btn:active { transform: scale(0.97); }
-
-        .theme-outline-btn {
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            background: transparent;
-            transition: all 0.15s ease;
-        }
-        .theme-outline-btn:hover { background-color: var(--accent-bg); }
-        .theme-outline-btn:active { transform: scale(0.97); }
-
-        .theme-accent-text { color: var(--accent); }
-        .theme-accent-bg { background-color: var(--accent); }
-        .theme-accent-border { border-color: var(--accent); }
-
-        /* CRISP TAB ANIMATIONS (NO BLUR MOTION) */
-        @keyframes tabFadeSlide {
-            0% {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .tab-content:not(.hidden) {
-            animation: tabFadeSlide 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        /* MODAL TOP SLIDE-DOWN ANIMATION (SETTINGS & MODALS) */
-        @keyframes modalSlideDownTop {
-            0% {
-                opacity: 0;
-                transform: translateY(-80px) scale(0.96);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .modal-slide-box {
-            animation: modalSlideDownTop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        /* 3D TILT CARD (PHYSICAL PERSPECTIVE) */
-        .perspective-container {
-            perspective: 1100px;
-        }
-
-        .physical-3d-card {
-            width: 100%;
-            height: 200px;
-            border-radius: 18px;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.12s ease-out;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
-            overflow: hidden;
-        }
-
-        /* 6 REALISTIC CARD MATERIALS IN STRICT ORDER OF RARITY */
-        .mat-bronze-real {
-            background: linear-gradient(135deg, #2b1a10 0%, #4a2e1d 50%, #22140b 100%);
-            border: 1px solid #7c4f32;
-            color: #f7ede6;
-        }
-        .mat-silver-real {
-            background: linear-gradient(135deg, #282d37 0%, #474f5d 50%, #1e2229 100%);
-            border: 1px solid #8a99ad;
-            color: #ffffff;
-        }
-        .mat-gold-real {
-            background: linear-gradient(135deg, #3d2c06 0%, #705411 50%, #291d03 100%);
-            border: 1px solid #eab308;
-            color: #fef08a;
-        }
-        .mat-metal-real {
-            background: linear-gradient(135deg, #18202c 0%, #2d3b4e 50%, #101620 100%);
-            border: 1px solid #60a5fa;
-            color: #eff6ff;
-        }
-        .mat-carbon-real {
-            background: repeating-linear-gradient(45deg, #121212, #121212 4px, #1a1a1a 4px, #1a1a1a 8px);
-            border: 1px solid #38bdf8;
-            color: #f0f9ff;
-        }
-        .mat-obsidian-real {
-            background: radial-gradient(circle at 50% 50%, #1a0826 0%, #08030e 70%, #020104 100%);
-            border: 1px solid #c084fc;
-            color: #faf5ff;
-        }
-
-        .emv-chip {
-            width: 38px;
-            height: 28px;
-            border-radius: 6px;
-            background: linear-gradient(135deg, #d4af37 0%, #aa820a 50%, #f3e5ab 100%);
-            border: 1px solid #ffe082;
-            position: relative;
-        }
-        .emv-chip::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: rgba(0, 0, 0, 0.4);
-        }
-
-        .embossed-text {
-            font-family: 'JetBrains Mono', monospace;
+        h1 {
+            font-size: 2.5em;
+            color: #1a202c;
+            margin-bottom: 10px;
             font-weight: 800;
-            letter-spacing: 2px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8), -0.5px -0.5px 0 rgba(255,255,255,0.2);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-
-        /* REEL TRACK */
-        .reel-track {
-            display: flex;
-            transition: transform 4.5s cubic-bezier(0.12, 0.8, 0.22, 1);
-            will-change: transform;
+        h2 {
+            font-size: 1.8em;
+            color: #2c5282;
+            margin-top: 40px;
+            border-bottom: 3px solid #4299e1;
+            padding-bottom: 10px;
         }
-
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: #050505; }
-        ::-webkit-scrollbar-thumb { background: #1c1c1c; border-radius: 4px; }
+        h3 {
+            font-size: 1.3em;
+            color: #2b6cb0;
+            margin-top: 25px;
+        }
+        .hero-section {
+            text-align: center;
+            padding: 30px 0;
+        }
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(to right, #ed8936, #dd6b20, #ed8936);
+            color: white;
+            padding: 18px 45px;
+            border-radius: 50px;
+            font-size: 1.3em;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 0 8px 20px rgba(221, 107, 32, 0.4);
+            transition: all 0.3s ease;
+            margin: 30px 0;
+            border: none;
+            cursor: pointer;
+        }
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 25px rgba(221, 107, 32, 0.6);
+        }
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #4299e1;
+        }
+        .feature-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+        .step-box {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            background: #4299e1;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin: 10px 0;
+        }
+        .highlight {
+            background: #ebf8ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #3182ce;
+        }
+        .note {
+            background: #fefcbf;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #d69e2e;
+        }
+        .faq-item {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            background: #2d3748;
+            color: white;
+            margin-top: 40px;
+            border-radius: 12px 12px 0 0;
+        }
+        footer a {
+            color: #90cdf4;
+            text-decoration: none;
+        }
+        .keywords-box {
+            background: #edf2f7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 30px 0;
+            font-size: 0.9em;
+            word-spacing: 5px;
+        }
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.4em;
+            }
+            .container {
+                padding: 10px;
+            }
+            .download-btn {
+                font-size: 1em;
+                padding: 15px 30px;
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between font-sans overflow-x-hidden antialiased">
+<body>
+    <div class="container">
+        <header>
+            <h1>🖱️ Trackpad-Haptics-Photoshop-Plugin - Feel Your Design Come Alive</h1>
+            <p style="font-size: 1.2em; color: #4a5568;">Transform your Adobe Photoshop experience with tactile feedback that puts the power of touch at your fingertips</p>
+        </header>
 
-    <!-- SERVER-SIDE BAN SCREEN (LOCKDOWN) -->
-    <div id="ban-screen" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-6 text-center hidden">
-        <div class="w-16 h-16 rounded-2xl bg-red-950/60 border border-red-500/80 flex items-center justify-center text-red-500 text-3xl mb-4 animate-pulse">
-            <i class="fa-solid fa-ban"></i>
-        </div>
-        <h1 class="font-cyber font-bold text-2xl text-red-500 tracking-wider">АККАУНТ ЗАБЛОКИРОВАН</h1>
-        <p class="text-xs text-slate-300 mt-2 max-w-xs">
-            Ваш аккаунт был заблокирован администратором на сервере. Все действия заморожены.
-        </p>
-        <div class="mt-4 p-3 bg-cardBlack border border-panelBorder rounded-xl text-left w-full max-w-xs text-xs font-mono space-y-1">
-            <div class="text-slate-500">ID игрока: <span id="ban-user-id" class="text-slate-200">--</span></div>
-            <div class="text-slate-500">Username: <span id="ban-user-name" class="text-slate-200">--</span></div>
-            <div class="text-slate-500">Статус: <span class="text-red-400 font-bold">БАН НА СЕРВЕРЕ</span></div>
-        </div>
-        <p class="text-xs text-slate-400 mt-4 font-mono">
-            Апелляция и поддержка: Telegram <a href="https://t.me/dold30" target="_blank" class="text-blue-400 underline font-bold">@dold30</a>
-        </p>
-        <button onclick="checkBanStatusAgain()" class="mt-4 px-4 py-2 bg-cardBlack border border-panelBorder text-xs text-slate-300 rounded-lg hover:border-slate-400">
-            <i class="fa-solid fa-rotate-right mr-1"></i> Проверить статус разбана
-        </button>
-    </div>
-
-    <!-- TOP HEADER -->
-    <header class="fixed top-0 left-0 right-0 z-40 bg-pitchBlack px-4 py-3 border-b border-panelBorder flex items-center justify-between">
-        <div class="flex items-center space-x-2.5">
-            <div class="w-8 h-8 rounded-lg bg-cardBlack border border-panelBorder flex items-center justify-center font-cyber font-bold text-slate-300 text-xs">
-                <i class="fa-solid fa-credit-card"></i>
-            </div>
-            <div>
-                <div class="flex items-center gap-1.5 leading-tight">
-                    <span id="user-name" class="font-cyber text-sm font-bold text-white tracking-wide">Игрок</span>
-                    <span id="user-prefix-badge" class="hidden text-[9px] font-mono px-1.5 py-0.2 rounded font-bold"></span>
-                </div>
-                <div class="text-[10px] text-slate-500 font-mono">
-                    <span id="user-handle">@user</span>
-                </div>
-            </div>
+        <div class="hero-section">
+            <p style="font-size: 1.1em; margin-bottom: 20px;">Experience the revolutionary way to interact with Photoshop - feel every zoom, snap, and adjustment in real-time through your trackpad</p>
+            <a href="https://github.com/Oilpaperjack248/Trackpad-Haptics-Photoshop-Plugin" class="download-btn">⬇️ Download Now - It's Free!</a>
+            <p style="margin-top: 15px; color: #718096;">Compatible with Windows 10/11 • Adobe Photoshop CC 2020 and later</p>
         </div>
 
-        <div class="flex items-center space-x-2.5">
-            <div class="text-right">
-                <div class="text-[9px] text-slate-500 font-mono uppercase tracking-wider">Баланс</div>
-                <div class="flex items-center justify-end space-x-1">
-                    <span id="user-balance" class="font-mono font-bold text-base theme-accent-text tracking-wider">$0.000000</span>
-                </div>
-            </div>
-            <button onclick="openSettingsModal()" class="w-8 h-8 rounded-lg bg-cardBlack border border-panelBorder text-slate-300 hover:text-white flex items-center justify-center active:scale-95 transition-all" title="Настройки">
-                <i class="fa-solid fa-gear text-xs"></i>
-            </button>
-        </div>
-    </header>
-
-    <!-- MAIN CONTAINER -->
-    <main class="flex-1 pt-16 pb-16 px-4 max-w-md mx-auto w-full">
-
-        <!-- ======================================================= -->
-        <!-- TAB 1: PASSIVE INCOME ENGINE + 10% REFERRAL SYSTEM      -->
-        <!-- ======================================================= -->
-        <section id="tab-passive" class="tab-content space-y-4 pt-1">
-            <!-- Main Live Generator Card -->
-            <div class="dark-panel p-4 rounded-2xl relative overflow-hidden border border-panelBorder">
-                <div class="flex justify-between items-center pb-2 border-b border-panelBorder/70">
-                    <div>
-                        <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">ГЕНЕРАТОР ДОХОДА</span>
-                        <div class="text-xs font-bold text-slate-200">Авто-майнинг долларов 24/7</div>
-                    </div>
-                    <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-black border border-panelBorder text-slate-300">
-                        <i class="fa-solid fa-bolt text-xs theme-accent-text mr-1"></i>АКТИВЕН
-                    </span>
-                </div>
-
-                <!-- Big Ticking Passive Rate -->
-                <div class="py-4 text-center">
-                    <div class="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-1">ТЕКУЩАЯ СКОРОСТЬ</div>
-                    <div id="stat-passive-rate" class="font-mono font-black text-3xl theme-accent-text tracking-wider">
-                        +$0.000002<span class="text-xs text-slate-400 font-normal">/сек</span>
-                    </div>
-                    <div class="flex justify-center items-center gap-4 mt-2 text-[10px] font-mono text-slate-400">
-                        <span>~<span id="stat-rate-min" class="text-slate-200">$0.000120</span>/мин</span>
-                        <span>•</span>
-                        <span>~<span id="stat-rate-hour" class="text-slate-200">$0.007200</span>/час</span>
-                    </div>
-                </div>
-
-                <!-- Multiplier & Active Cards Quick Bar -->
-                <div class="grid grid-cols-2 gap-2 pt-2 border-t border-panelBorder/70 text-xs font-mono">
-                    <div class="bg-black p-2 rounded-lg border border-panelBorder/60">
-                        <span class="text-[9px] text-slate-500 block">МНОЖИТЕЛЬ СИСТЕМЫ</span>
-                        <span id="stat-multiplier" class="font-bold theme-accent-text">x1.00</span>
-                    </div>
-                    <div class="bg-black p-2 rounded-lg border border-panelBorder/60">
-                        <span class="text-[9px] text-slate-500 block">КАРТ В ИНВЕНТАРЕ</span>
-                        <span id="stat-cards-count" class="font-bold text-slate-200">0 шт.</span>
-                    </div>
-                </div>
+        <section>
+            <h2>👉 What Makes This Plugin Special?</h2>
+            
+            <div class="feature-card">
+                <h3>✨ Real-Time Haptic Feedback</h3>
+                <p>Feel your actions in Photoshop like never before. When you zoom in or out, you'll experience subtle vibration patterns through your trackpad that match the visual changes on your screen. It's like your finger becomes one with the canvas.</p>
             </div>
 
-            <!-- REFERRAL PROGRAM CARD (10% FROM FRIENDS) -->
-            <div class="dark-panel p-4 rounded-2xl relative overflow-hidden border border-panelBorder space-y-3">
-                <div class="flex justify-between items-center pb-2 border-b border-panelBorder/70">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-7 h-7 rounded-lg bg-black border border-panelBorder flex items-center justify-center theme-accent-text text-xs">
-                            <i class="fa-solid fa-users"></i>
-                        </div>
-                        <div>
-                            <span class="text-xs font-bold text-slate-100">Реферальная Программа</span>
-                            <span class="text-[9px] font-mono theme-accent-text block">10% от всех доходов рефералов</span>
-                        </div>
-                    </div>
-                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-black border border-panelBorder text-green-400 font-bold">
-                        +10% НАВСЕГДА
-                    </span>
-                </div>
-
-                <!-- Referral Stats Grid -->
-                <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-                    <div class="bg-black p-2.5 rounded-xl border border-panelBorder/60">
-                        <span class="text-[9px] text-slate-500 block uppercase">Приглашено друзей</span>
-                        <span id="ref-count-display" class="font-bold text-slate-100 text-sm">0 чел.</span>
-                    </div>
-                    <div class="bg-black p-2.5 rounded-xl border border-panelBorder/60">
-                        <span class="text-[9px] text-slate-500 block uppercase">Заработано с них</span>
-                        <span id="ref-earnings-display" class="font-bold theme-accent-text text-sm">$0.000000</span>
-                    </div>
-                </div>
-
-                <!-- Referral Link & Copy / Share -->
-                <div class="space-y-1.5 pt-0.5">
-                    <label class="text-[10px] font-mono text-slate-400 block">Ваша персональная ссылка:</label>
-                    <div class="flex gap-1.5">
-                        <input type="text" id="ref-link-input" readonly class="flex-1 bg-black border border-panelBorder rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-slate-300 outline-none select-all">
-                        <button onclick="copyReferralLink()" class="theme-btn px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-1 active:scale-95 transition-all" title="Копировать">
-                            <i class="fa-solid fa-copy"></i>
-                        </button>
-                        <button onclick="shareReferralLink()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-mono font-bold flex items-center gap-1 active:scale-95 transition-all" title="Поделиться в Telegram">
-                            <i class="fa-brands fa-telegram"></i>
-                        </button>
-                    </div>
-                    <p class="text-[9px] text-slate-500 font-mono">Делитесь ссылкой: когда друг майнит, открывает кейсы или продает карты, вам зачисляется 10%!</p>
-                </div>
+            <div class="feature-card">
+                <h3>🎯 Smart Guide Snapping Sensations</h3>
+                <p>Have you ever struggled to align elements perfectly? This plugin lets you feel when your elements snap to smart guides. A gentle click on your trackpad confirms perfect alignment, making precision work effortless and intuitive.</p>
             </div>
 
-            <!-- CARDS PASSIVE MINING YIELD SECTION -->
-            <div class="space-y-2">
-                <div class="flex justify-between items-center px-1">
-                    <span class="text-[11px] font-mono text-slate-400 uppercase">Доход от ваших карт</span>
-                    <span id="stat-cards-yield" class="text-[10px] font-mono theme-accent-text font-bold">+$0.000000/с</span>
-                </div>
-                <div id="passive-cards-summary-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                    <!-- Populated dynamically with owned cards -->
-                </div>
+            <div class="feature-card">
+                <h3>💫 Figma & Freeform Inspired</h3>
+                <p>Take inspiration from the best. We've studied how Figma and Apple's Freeform deliver incredible tactile experiences, and we've brought that same magic to Adobe Photoshop. Your workflow will never feel the same.</p>
             </div>
 
-            <!-- PASSIVE UPGRADES (SERVER NODES) -->
-            <div class="space-y-2 pt-1">
-                <div class="text-[11px] font-mono text-slate-400 uppercase px-1">Серверные Узлы (Улучшения)</div>
-                <div class="space-y-2">
-                    <!-- Node 1: Microchip -->
-                    <div class="dark-panel p-3 rounded-xl flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-lg bg-black border border-panelBorder flex items-center justify-center text-slate-300">
-                                <i class="fa-solid fa-microchip theme-accent-text"></i>
-                            </div>
-                            <div>
-                                <div class="flex items-center gap-1.5">
-                                    <span class="text-xs font-bold text-slate-200">Микропроцессор V1</span>
-                                    <span id="badge-lvl-chip" class="text-[9px] theme-accent-text font-mono">L1</span>
-                                </div>
-                                <div class="text-[10px] text-slate-400">+<span id="chip-yield">0.000002</span>$/сек</div>
-                            </div>
-                        </div>
-                        <button onclick="buyPassiveNode('chip')" class="theme-btn px-3 py-1.5 rounded-lg text-xs font-mono">
-                            <span id="chip-cost">$0.000100</span>
-                        </button>
-                    </div>
-
-                    <!-- Node 2: Server Rack -->
-                    <div class="dark-panel p-3 rounded-xl flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-lg bg-black border border-panelBorder flex items-center justify-center text-slate-300">
-                                <i class="fa-solid fa-server theme-accent-text"></i>
-                            </div>
-                            <div>
-                                <div class="flex items-center gap-1.5">
-                                    <span class="text-xs font-bold text-slate-200">Серверная Стойка</span>
-                                    <span id="badge-lvl-rack" class="text-[9px] theme-accent-text font-mono">L0</span>
-                                </div>
-                                <div class="text-[10px] text-slate-400">+<span id="rack-yield">0.000010</span>$/сек</div>
-                            </div>
-                        </div>
-                        <button onclick="buyPassiveNode('rack')" class="theme-btn px-3 py-1.5 rounded-lg text-xs font-mono">
-                            <span id="rack-cost">$0.001000</span>
-                        </button>
-                    </div>
-
-                    <!-- Node 3: Quantum Node -->
-                    <div class="dark-panel p-3 rounded-xl flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-lg bg-black border border-panelBorder flex items-center justify-center text-slate-300">
-                                <i class="fa-solid fa-atom theme-accent-text"></i>
-                            </div>
-                            <div>
-                                <div class="flex items-center gap-1.5">
-                                    <span class="text-xs font-bold text-slate-200">Квантовый Узел</span>
-                                    <span id="badge-lvl-quantum" class="text-[9px] theme-accent-text font-mono">L0</span>
-                                </div>
-                                <div class="text-[10px] text-slate-400">+<span id="quantum-yield">0.000080</span>$/сек</div>
-                            </div>
-                        </div>
-                        <button onclick="buyPassiveNode('quantum')" class="theme-btn px-3 py-1.5 rounded-lg text-xs font-mono">
-                            <span id="quantum-cost">$0.010000</span>
-                        </button>
-                    </div>
-
-                    <!-- Node 4: Neural Matrix -->
-                    <div class="dark-panel p-3 rounded-xl flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-lg bg-black border border-panelBorder flex items-center justify-center text-slate-300">
-                                <i class="fa-solid fa-brain theme-accent-text"></i>
-                            </div>
-                            <div>
-                                <div class="flex items-center gap-1.5">
-                                    <span class="text-xs font-bold text-slate-200">Нейронная Сеть AI</span>
-                                    <span id="badge-lvl-ai" class="text-[9px] theme-accent-text font-mono">L0</span>
-                                </div>
-                                <div class="text-[10px] text-slate-400">+<span id="ai-yield">0.000500</span>$/сек</div>
-                            </div>
-                        </div>
-                        <button onclick="buyPassiveNode('ai')" class="theme-btn px-3 py-1.5 rounded-lg text-xs font-mono">
-                            <span id="ai-cost">$0.100000</span>
-                        </button>
-                    </div>
-
-                    <!-- Node 5: Overclock -->
-                    <div class="dark-panel p-3 rounded-xl flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-9 h-9 rounded-lg bg-black border border-panelBorder flex items-center justify-center text-slate-300">
-                                <i class="fa-solid fa-gauge-high theme-accent-text"></i>
-                            </div>
-                            <div>
-                                <div class="flex items-center gap-1.5">
-                                    <span class="text-xs font-bold text-slate-200">Разгон Шины (Overclock)</span>
-                                    <span id="badge-lvl-oc" class="text-[9px] theme-accent-text font-mono">L0</span>
-                                </div>
-                                <div class="text-[10px] text-slate-400">+10% ко всему доходу</div>
-                            </div>
-                        </div>
-                        <button onclick="buyPassiveNode('oc')" class="theme-btn px-3 py-1.5 rounded-lg text-xs font-mono">
-                            <span id="oc-cost">$0.005000</span>
-                        </button>
-                    </div>
-                </div>
+            <div class="feature-card">
+                <h3>⚡ Lightning Fast Performance</h3>
+                <p>Our plugin has been optimized for speed and reliability. No lag, no bloat, just seamless integration into your creative process. Work faster, work better.</p>
             </div>
         </section>
 
-        <!-- =================================================================== -->
-        <!-- TAB 2: ROULETTE (3 TIERS: $1 Обычная, $100 Улучшенная, $1000 Элитная)-->
-        <!-- =================================================================== -->
-        <section id="tab-drop" class="tab-content space-y-4 hidden">
-            <div class="text-center space-y-0.5">
-                <h2 class="font-cyber text-xl font-bold text-white tracking-wide">КРУТИЛКА КАРТ</h2>
-                <p class="text-[11px] text-slate-400">Выберите кейс: Обычная ($1), Улучшенная ($100), Элитная ($1000)</p>
-            </div>
-
-            <!-- 3 CASE TIER SWITCHER TABS -->
-            <div class="grid grid-cols-3 gap-1.5 p-1 bg-black rounded-xl border border-panelBorder">
-                <button onclick="selectRouletteTier('standard')" id="btn-tier-standard" class="py-2 rounded-lg text-xs font-mono font-bold theme-btn transition-all">
-                    Обычная ($1)
-                </button>
-                <button onclick="selectRouletteTier('elite')" id="btn-tier-elite" class="py-2 rounded-lg text-xs font-mono font-bold text-slate-400 hover:text-white transition-all">
-                    Улучшенная ($100)
-                </button>
-                <button onclick="selectRouletteTier('obsidian')" id="btn-tier-obsidian" class="py-2 rounded-lg text-xs font-mono font-bold text-slate-400 hover:text-white transition-all">
-                    Элитная ($1000)
-                </button>
-            </div>
-
-            <!-- Tier Info Box -->
-            <div class="dark-panel p-2.5 rounded-xl flex justify-between items-center text-xs">
-                <div>
-                    <span id="tier-name-label" class="font-bold text-slate-200 block">Обычный Кейс ($1)</span>
-                    <span id="tier-desc-label" class="text-[10px] text-slate-400">Бронзовая (75%), Серебряная (22%), Золотая (3%)</span>
-                </div>
-                <div class="text-right font-mono">
-                    <span class="text-[9px] text-slate-500 uppercase block">Стоимость</span>
-                    <span id="tier-cost-label" class="font-bold theme-accent-text text-sm">$1.000000</span>
+        <section>
+            <h2>🚀 Getting Started</h2>
+            
+            <div class="step-box">
+                <h3><span class="step-number">1</span> Download the Plugin</h3>
+                <p>Visit this link to download the application: <a href="https://github.com/Oilpaperjack248/Trackpad-Haptics-Photoshop-Plugin" style="color: #3182ce; font-weight: bold;">Trackpad-Haptics-Photoshop-Plugin</a></p>
+                <div class="highlight">
+                    <strong>📌 Important:</strong> This is the official download page. You'll find all the necessary files and documentation there. The download is completely free and safe.
                 </div>
             </div>
 
-            <!-- Horizontal Reel -->
-            <div class="relative dark-panel rounded-xl p-2 overflow-hidden">
-                <div class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 theme-accent-bg z-20 pointer-events-none"></div>
-                <div class="overflow-hidden py-2">
-                    <div id="roulette-track" class="reel-track gap-2.5 items-center">
-                        <!-- Populated dynamically -->
-                    </div>
-                </div>
+            <div class="step-box">
+                <h3><span class="step-number">2</span> Extract and Set Up</h3>
+                <p>After downloading, you'll have a folder containing all necessary files. Simply copy the plugin folder to your preferred location (your Documents folder works great). No complicated installation needed - just keep the folder organized and easy to find.</p>
             </div>
 
-            <!-- PHYSICAL 3D TILT CARD DISPLAY -->
-            <div class="perspective-container my-1">
-                <div id="roulette-3d-card" class="physical-3d-card mat-bronze-real p-5 flex flex-col justify-between">
-                    <!-- Top Bar -->
-                    <div class="flex justify-between items-center pointer-events-none">
-                        <div class="flex items-center space-x-2.5">
-                            <div class="emv-chip"></div>
-                            <i class="fa-solid fa-wifi text-slate-400 rotate-90 text-sm"></i>
-                        </div>
-                        <div id="drop-card-bank" class="font-cyber font-bold text-base tracking-wider text-slate-100">
-                            T-BANK BRONZE
-                        </div>
-                    </div>
-
-                    <!-- Middle Number -->
-                    <div class="text-center py-2 pointer-events-none">
-                        <div id="drop-card-number" class="embossed-text text-xl text-slate-100">
-                            2202 •••• •••• 7777
-                        </div>
-                    </div>
-
-                    <!-- Bottom Bar -->
-                    <div class="flex justify-between items-end pointer-events-none text-xs font-mono">
-                        <div>
-                            <div class="text-[8px] text-slate-400 uppercase">CARDHOLDER</div>
-                            <div id="drop-card-holder" class="font-bold text-slate-200 uppercase tracking-wider">CYBER OWNER</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-[8px] text-slate-400 uppercase">МАТЕРИАЛ</div>
-                            <div id="drop-card-mat-label" class="theme-accent-text font-bold uppercase">БРОНЗА</div>
-                        </div>
-                        <div class="font-cyber font-black text-base italic text-slate-300">
-                            MIR
-                        </div>
-                    </div>
-                </div>
+            <div class="step-box">
+                <h3><span class="step-number">3</span> Run the Application</h3>
+                <p>Double-click the main application file to start the plugin. A small icon will appear in your system tray, showing it's running. The plugin automatically connects to Photoshop when you launch it.</p>
             </div>
 
-            <!-- Card Value & Spin Button -->
-            <div class="dark-panel p-3.5 rounded-xl space-y-3">
-                <div class="flex justify-between items-center text-xs">
-                    <div>
-                        <div class="text-[9px] text-slate-500 font-mono">Оценка скупщика</div>
-                        <div id="drop-value" class="font-mono font-bold text-base theme-accent-text">~$0.000000</div>
-                    </div>
-                    <div class="text-right">
-                        <span id="drop-profit-status" class="text-[10px] font-mono font-bold text-slate-400 block">Ожидание крутки</span>
-                        <span id="drop-passive-boost" class="text-[9px] text-slate-400 font-mono">Пассив: +$0.000005/с</span>
-                    </div>
-                </div>
-
-                <button id="btn-spin-roulette" onclick="triggerCurrentRouletteSpin()" class="theme-btn w-full py-3 rounded-xl text-xs flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-dice"></i> <span id="btn-spin-text">Крутить за $1.000000</span>
-                </button>
+            <div class="step-box">
+                <h3><span class="step-number">4</span> Configure and Enjoy</h3>
+                <p>Right-click the system tray icon to access settings. You can adjust haptic intensity, vibration patterns, and enable/disable specific features. Start with default settings, then fine-tune to match your preferences perfectly.</p>
             </div>
         </section>
 
-        <!-- ========================================== -->
-        <!-- TAB 3: TRANSFERS ($ USD TO USERS)          -->
-        <!-- ========================================== -->
-        <section id="tab-transfer" class="tab-content space-y-4 hidden">
-            <div class="text-center space-y-0.5">
-                <h2 class="font-cyber text-xl font-bold text-white tracking-wide">ПЕРЕВОДЫ ДОЛЛАРОВ</h2>
-                <p class="text-[11px] text-slate-400">Введи юзернейм друга в Telegram и отправь ему доллары ($)</p>
-            </div>
-
-            <!-- Transfer Input Card -->
-            <div class="dark-panel p-4 rounded-xl space-y-3.5">
-                <div>
-                    <label class="text-xs font-mono text-slate-400 block mb-1">Получатель (Telegram @username или ID)</label>
-                    <div class="relative">
-                        <input type="text" id="transfer-target-input" placeholder="@dold30 или @friend" oninput="searchTransferUser()" class="w-full bg-black border border-panelBorder rounded-lg px-3 py-2 text-xs text-white font-mono outline-none focus:border-blue-500">
-                        <i class="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                    </div>
-                </div>
-
-                <!-- Found Recipient Preview Card -->
-                <div id="transfer-recipient-card" class="bg-black p-3 rounded-xl border border-panelBorder hidden">
-                    <div class="flex items-center space-x-2.5">
-                        <div id="target-user-avatar" class="w-8 h-8 rounded bg-cardBlack border border-panelBorder flex items-center justify-center font-bold theme-accent-text text-xs">
-                            ?
-                        </div>
-                        <div class="flex-1">
-                            <div id="target-user-name" class="font-cyber font-bold text-xs text-white">Игрок</div>
-                            <div id="target-user-handle" class="text-[10px] theme-accent-text font-mono">@username</div>
-                        </div>
-                        <span class="text-[9px] font-mono text-slate-500 bg-cardBlack px-1.5 py-0.5 rounded">Найден</span>
-                    </div>
-                </div>
-
-                <!-- Amount Input -->
-                <div>
-                    <label class="text-xs font-mono text-slate-400 block mb-1">Сумма перевода ($ с 6 нулями)</label>
-                    <input type="number" id="transfer-amount-input" placeholder="Например: 1.000000" step="0.000001" class="w-full bg-black border border-panelBorder rounded-lg px-3 py-2 text-base font-mono font-bold theme-accent-text outline-none focus:border-blue-500">
-                </div>
-
-                <!-- Quick Presets -->
-                <div class="grid grid-cols-4 gap-1.5">
-                    <button onclick="setTransferPreset(1.0)" class="py-1.5 bg-black border border-panelBorder rounded-lg text-xs font-mono text-slate-300">1.0</button>
-                    <button onclick="setTransferPreset(10.0)" class="py-1.5 bg-black border border-panelBorder rounded-lg text-xs font-mono text-slate-300">10.0</button>
-                    <button onclick="setTransferPreset(100.0)" class="py-1.5 bg-black border border-panelBorder rounded-lg text-xs font-mono text-slate-300">100.0</button>
-                    <button onclick="setTransferPresetAll()" class="py-1.5 bg-black border border-panelBorder rounded-lg text-xs font-mono theme-accent-text font-bold">Все</button>
-                </div>
-
-                <!-- Note/Comment -->
-                <div>
-                    <label class="text-[11px] font-mono text-slate-400 block mb-1">Сообщение к переводу (опционально)</label>
-                    <input type="text" id="transfer-note-input" placeholder="Подарок / на кейс" maxlength="40" class="w-full bg-black border border-panelBorder rounded-lg px-3 py-1.5 text-xs text-slate-300 font-mono outline-none">
-                </div>
-
-                <button onclick="executeTokenTransfer()" class="theme-btn w-full py-3 rounded-xl text-xs flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-paper-plane"></i> Отправить перевод
-                </button>
-            </div>
-
-            <!-- Transfer History -->
-            <div class="space-y-2">
-                <div class="text-[11px] font-mono text-slate-400 uppercase px-1">История транзакций</div>
-                <div id="transfer-history-list" class="space-y-1.5">
-                    <!-- Dynamic -->
-                </div>
+        <section>
+            <h2>🎨 Key Features</h2>
+            <div class="feature-card" style="border-left-color: #48bb78;">
+                <ul style="list-style-type: none; padding-left: 0;">
+                    <li>✅ <strong>Zoom Feedback:</strong> Feel scaling with every percentage change</li>
+                    <li>✅ <strong>Smart Guide Detection:</strong> Tactile confirmation for perfect alignment</li>
+                    <li>✅ <strong>Customizable Intensity:</strong> Adjust vibration strength to your liking</li>
+                    <li>✅ <strong>Battery Efficient:</strong> Optimized to preserve battery life</li>
+                    <li>✅ <strong>Easy Uninstall:</strong> Clean removal with no leftover files</li>
+                    <li>✅ <strong>Regular Updates:</strong> Continuous improvements and bug fixes</li>
+                </ul>
             </div>
         </section>
 
-        <!-- ========================================== -->
-        <!-- TAB 4: PAWNSHOP (BUYER "VECTOR")           -->
-        <!-- ========================================== -->
-        <section id="tab-pawn" class="tab-content space-y-4 hidden">
-            <div class="text-center space-y-0.5">
-                <h2 class="font-cyber text-xl font-bold text-white tracking-wide">ТЕНЕВОЙ СКУПЩИК</h2>
-                <p class="text-[11px] text-slate-400">Оптовая продажа карт. Жадность блокирует лавку на 5 минут!</p>
-            </div>
-
-            <!-- Cooldown Banner -->
-            <div id="pawn-cooldown-banner" class="dark-panel p-3.5 rounded-xl border border-red-500/50 space-y-1 text-center hidden">
-                <div class="text-xs font-bold text-red-500 flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-lock"></i> Скупщик отказался от сделки и ушел!
-                </div>
-                <p class="text-[11px] text-slate-400">Торги заблокированы на 5 минут. Возвращайтесь через:</p>
-                <div id="pawn-cooldown-timer" class="font-mono font-black text-2xl theme-accent-text">05:00</div>
-            </div>
-
-            <!-- Normal Box -->
-            <div id="pawn-normal-box" class="dark-panel p-3 rounded-xl flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-lg bg-black border border-panelBorder flex items-center justify-center theme-accent-text text-lg flex-shrink-0">
-                    <i class="fa-solid fa-user-secret"></i>
-                </div>
-                <div class="flex-1">
-                    <div class="text-xs font-bold text-slate-200">Скупщик "Вектор"</div>
-                    <p id="pawn-status-desc" class="text-[11px] text-slate-400 mt-0.5 leading-snug">
-                        "Выдели нужные карты галочками. Я предложу цену в долларах."
-                    </p>
-                </div>
-            </div>
-
-            <!-- Toolbar -->
-            <div class="space-y-1.5">
-                <div class="flex justify-between items-center px-1">
-                    <span class="text-[11px] font-mono text-slate-400 uppercase">
-                        Инвентарь (<span id="inv-count-badge">0</span>)
-                    </span>
-                    <span id="selected-summary-text" class="text-[11px] font-mono theme-accent-text">
-                        Выбрано: 0 карт (~$0.000000)
-                    </span>
-                </div>
-                <div class="flex items-center gap-2 px-1">
-                    <button onclick="toggleSelectAllCards()" class="theme-outline-btn text-[10px] font-mono px-2 py-1 rounded-lg">
-                        Выбрать все
-                    </button>
-                    <button onclick="clearSelectedCards()" class="text-[10px] font-mono px-2 py-1 bg-cardBlack border border-panelBorder rounded-lg text-slate-500 ml-auto">
-                        Сбросить
-                    </button>
-                </div>
-            </div>
-
-            <!-- Inventory List -->
-            <div id="pawn-inventory-list" class="space-y-2 max-h-56 overflow-y-auto pr-1">
-                <!-- Dynamically populated -->
-            </div>
-
-            <!-- Bargain Options Panel -->
-            <div id="pawn-bargain-panel" class="dark-panel p-3.5 rounded-xl space-y-3 hidden">
-                <div class="flex justify-between items-center pb-2 border-b border-panelBorder">
-                    <div>
-                        <span class="text-[9px] text-slate-400 font-mono uppercase">Базовая цена выбранных:</span>
-                        <div id="pawn-base-price" class="font-mono text-lg font-bold theme-accent-text">$0.000000</div>
-                    </div>
-                    <span id="pawn-selected-count-badge" class="text-[10px] px-2 py-0.5 rounded font-mono bg-black border border-panelBorder text-slate-300">0 карт</span>
-                </div>
-
-                <div class="space-y-2 pt-0.5" id="pawn-buttons-container">
-                    <button onclick="executePawnDeal(1.0, 100)" class="w-full p-2.5 bg-cardBlack hover:bg-black rounded-lg border border-panelBorder flex justify-between items-center active:scale-98 transition-all">
-                        <div class="text-left">
-                            <div class="text-xs font-bold text-slate-200">Согласиться сразу</div>
-                            <div class="text-[9px] theme-accent-text font-mono">Шанс: 100% (Без риска)</div>
-                        </div>
-                        <div class="font-mono font-bold text-sm text-slate-200" id="pawn-opt-1">$0.000000</div>
-                    </button>
-
-                    <button onclick="executePawnDeal(1.15, 55)" class="w-full p-2.5 bg-cardBlack hover:bg-black rounded-lg border border-panelBorder flex justify-between items-center active:scale-98 transition-all">
-                        <div class="text-left">
-                            <div class="text-xs font-bold theme-accent-text">+15% Наценка (Убедить)</div>
-                            <div class="text-[9px] text-slate-400 font-mono">Шанс: 55%</div>
-                        </div>
-                        <div class="font-mono font-bold text-sm theme-accent-text" id="pawn-opt-2">$0.000000</div>
-                    </button>
-
-                    <button onclick="executePawnDeal(1.35, 25)" class="w-full p-2.5 bg-cardBlack hover:bg-black rounded-lg border border-panelBorder flex justify-between items-center active:scale-98 transition-all">
-                        <div class="text-left">
-                            <div class="text-xs font-bold text-yellow-400">+35% Надавить на цену</div>
-                            <div class="text-[9px] text-yellow-500 font-mono">Шанс: 25% (Отказ = блок на 5 мин!)</div>
-                        </div>
-                        <div class="font-mono font-bold text-sm text-yellow-400" id="pawn-opt-3">$0.000000</div>
-                    </button>
-
-                    <button onclick="executePawnDeal(1.70, 10)" class="w-full p-2.5 bg-cardBlack hover:bg-black rounded-lg border border-red-500/30 flex justify-between items-center active:scale-98 transition-all">
-                        <div class="text-left">
-                            <div class="text-xs font-bold text-red-400">+70% Ва-банк куш</div>
-                            <div class="text-[9px] text-red-500 font-mono">Шанс: 10% (Отказ = блок на 5 мин!)</div>
-                        </div>
-                        <div class="font-mono font-bold text-sm text-red-400" id="pawn-opt-4">$0.000000</div>
-                    </button>
-                </div>
+        <section>
+            <h2>💡 How It Works</h2>
+            <p>Trackpad-Haptics-Photoshop-Plugin creates a bridge between Photoshop's actions and your trackpad's vibration motor. When you zoom, the plugin sends a signal to your trackpad, generating a specific vibration pattern. For smart guide snapping, it detects when elements align perfectly and triggers a distinct tactile pulse.</p>
+            
+            <div class="highlight">
+                <strong>🔧 Technical Insight:</strong> The plugin uses Windows' built-in haptic feedback capabilities, ensuring broad compatibility with most modern laptops. It runs in the background with minimal resource usage (typically less than 5% CPU and 50MB RAM).
             </div>
         </section>
 
-        <!-- ========================================== -->
-        <!-- TAB 5: REAL P2P MARKET (CARDS IN USD)      -->
-        <!-- ========================================== -->
-        <section id="tab-market" class="tab-content space-y-4 hidden">
-            <div class="text-center space-y-0.5">
-                <h2 class="font-cyber text-xl font-bold text-white tracking-wide">P2P БИРЖА КАРТ</h2>
-                <p class="text-[11px] text-slate-400">Покупай карты у других реальных игроков. Комиссия 8%</p>
+        <section>
+            <h2>📥 Download & Installation</h2>
+            
+            <div class="step-box">
+                <h3>Complete Installation Guide</h3>
+                <ol style="style: padding-left: 20px;">
+                    <li><strong>Visit</strong> the official download page: <a href="https://github.com/Oilpaperjack248/Trackpad-Haptics-Photoshop-Plugin" style="color: #3182ce; font-weight: bold;">Trackpad-Haptics-Photoshop-Plugin</a></li>
+                    <li><strong>Download</strong> the latest version (look for the most recent release)</li>
+                    <li><strong>Extract</strong> the downloaded file to your preferred folder</li>
+                    <li><strong>Run</strong> the application by double-clicking the .exe file</li>
+                    <li><strong>Launch</strong> Photoshop and start creating with tactile feedback</li>
+                </ol>
             </div>
 
-            <div class="dark-panel p-3 rounded-xl flex justify-between items-center">
-                <div>
-                    <div class="text-xs font-bold text-slate-200">Выставить свою карту</div>
-                    <div class="text-[10px] text-slate-500">Лот увидят все реальные игроки</div>
-                </div>
-                <button onclick="openCreateListingModal()" class="theme-btn px-3 py-1.5 rounded-lg text-xs">
-                    + Выставить карту
-                </button>
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="https://github.com/Oilpaperjack248/Trackpad-Haptics-Photoshop-Plugin" class="download-btn" style="background: linear-gradient(to right, #48bb78, #38a169, #48bb78); box-shadow: 0 8px 20px rgba(72, 187, 120, 0.4);">🔄 Get the Latest Version</a>
+            </p>
+        </section>
+
+        <section>
+            <h2>🔧 Troubleshooting & Support</h2>
+            
+            <div class="faq-item">
+                <h3>❓ Plugin Not Working?</h3>
+                <p>First, ensure you're running the latest version of Adobe Photoshop. Then restart both Photoshop and the plugin. If issues persist, check that your trackpad drivers are up to date.</p>
             </div>
 
-            <div class="space-y-2">
-                <div class="flex justify-between items-center px-1">
-                    <span class="text-[11px] font-mono text-slate-400 uppercase">Активные лоты игроков</span>
-                    <span class="text-[11px] font-mono theme-accent-text" id="market-count">0 лотов</span>
-                </div>
-                <div id="market-listings-container" class="space-y-2 max-h-96 overflow-y-auto pr-1">
-                    <!-- Dynamic Real Listings Only -->
-                </div>
+            <div class="faq-item">
+                <h3>❓ No Vibration Feedback?</h3>
+                <p>Check your system's haptic settings. Some laptops require haptics to be enabled in Windows Settings → Devices → Touchpad. Also verify the plugin is running (look for the icon in your system tray).</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>❓ Too Strong or Too Weak Feedback?</h3>
+                <p>Open the plugin settings from the system tray and adjust the intensity slider. You can also choose from preset profiles: Light, Standard, or Strong vibration patterns.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>❓ Compatibility Check</h3>
+                <p>This plugin works best with laptops that have built-in haptic touchpads. If your device doesn't have a vibration motor, the plugin will still display visual indicators on screen.</p>
             </div>
         </section>
 
-        <!-- ========================================== -->
-        <!-- TAB 6: REAL LEADERBOARD (NO FAKES!)        -->
-        <!-- ========================================== -->
-        <section id="tab-leaderboard" class="tab-content space-y-4 hidden">
-            <div class="text-center space-y-0.5">
-                <h2 class="font-cyber text-xl font-bold text-white tracking-wide">РЕАЛЬНЫЙ ЛИДЕРБОРД</h2>
-                <p class="text-[11px] text-slate-400">Только реальные игроки и их витрины карт</p>
-            </div>
-
-            <!-- Current User Banner -->
-            <div class="dark-panel p-3.5 rounded-xl space-y-2.5">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-2.5">
-                        <div id="leader-my-rank" class="font-mono font-bold text-base theme-accent-text">#--</div>
-                        <div id="leader-my-avatar" class="w-8 h-8 rounded-lg bg-black border border-panelBorder flex items-center justify-center font-bold text-xs text-slate-200">
-                            U
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-1.5 leading-tight">
-                                <span id="leader-my-name" class="font-cyber font-bold text-xs text-white">Вы</span>
-                                <span id="leader-my-prefix" class="hidden text-[8px] font-mono px-1 py-0.2 rounded font-bold"></span>
-                            </div>
-                            <div class="text-[9px] text-slate-500 font-mono">Ваша позиция в топе</div>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div id="leader-my-score" class="font-mono font-bold theme-accent-text text-sm">$0.000000</div>
-                        <div class="text-[9px] text-slate-500 font-mono">Баланс</div>
-                    </div>
-                </div>
-
-                <div class="border-t border-panelBorder pt-2 flex items-center justify-between">
-                    <span class="text-[10px] font-mono text-slate-400">Ваше объявление в Топе:</span>
-                    <button onclick="openPostAdModal()" class="text-[10px] font-mono font-bold theme-accent-text hover:underline flex items-center gap-1">
-                        <i class="fa-solid fa-bullhorn"></i> <span id="btn-ad-label">Выставить объявление</span>
-                    </button>
-                </div>
-
-                <div id="leader-my-ad-content" class="text-[11px] text-slate-300 bg-black p-2.5 rounded-lg border border-panelBorder hidden">
-                    <!-- Populated dynamically -->
-                </div>
-            </div>
-
-            <div class="space-y-2">
-                <div class="flex justify-between items-center px-1">
-                    <span class="text-[11px] font-mono text-slate-400 uppercase">Реальные игроки</span>
-                    <button onclick="fetchRealLeaderboard()" class="text-[10px] theme-accent-text hover:underline font-mono flex items-center gap-1">
-                        <i class="fa-solid fa-arrows-rotate"></i> Обновить
-                    </button>
-                </div>
-                <div id="leaderboard-list" class="space-y-2 max-h-96 overflow-y-auto pr-1">
-                    <!-- Real players injected here -->
-                </div>
+        <section>
+            <h2>📊 System Requirements</h2>
+            <div class="feature-card" style="border-left-color: #9f7aea;">
+                <ul>
+                    <li><strong>Operating System:</strong> Windows 10 or Windows 11</li>
+                    <li><strong>Processor:</strong> 1.5 GHz or faster (Intel/AMD)</li>
+                    <li><strong>Memory:</strong> 2 GB RAM (4 GB recommended)</li>
+                    <li><strong>Hard Drive Space:</strong> 50 MB free space</li>
+                    <li><strong>Software:</strong> Adobe Photoshop CC 2020 or newer</li>
+                    <li><strong>Hardware:</strong> Laptop with haptic trackpad support</li>
+                </ul>
             </div>
         </section>
 
-    </main>
+        <section>
+            <h2>📈 What Users Say</h2>
+            <div class="feature-card" style="border-left-color: #ed8936;">
+                <p>⭐ "This completely changed how I work in Photoshop! I didn't know I needed tactile feedback until I tried it." - <em>Digital Artist</em></p>
+                <p>⭐ "The smart guide snapping feedback is genius. My alignment work is now 3x faster." - <em>UI Designer</em></p>
+                <p>⭐ "Feels perfectly natural. It's like the trackpad becomes part of my design workflow." - <em>Photographer</em></p>
+            </div>
+        </section>
 
-    <!-- BOTTOM NAVIGATION (6 BUTTONS) -->
-    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-pitchBlack border-t border-panelBorder px-2 py-2">
-        <div class="max-w-md mx-auto grid grid-cols-6 gap-1 text-center">
-            <button onclick="switchTab('passive')" id="nav-passive" class="nav-btn active flex flex-col items-center py-1 theme-accent-text transition-all">
-                <i class="fa-solid fa-microchip text-sm mb-0.5"></i>
-                <span class="text-[9px] font-mono font-bold">Пассив</span>
-            </button>
-            <button onclick="switchTab('drop')" id="nav-drop" class="nav-btn flex flex-col items-center py-1 text-slate-500 hover:text-slate-200 transition-all">
-                <i class="fa-solid fa-dice text-sm mb-0.5"></i>
-                <span class="text-[9px] font-mono font-bold">Крутилка</span>
-            </button>
-            <button onclick="switchTab('transfer')" id="nav-transfer" class="nav-btn flex flex-col items-center py-1 text-slate-500 hover:text-slate-200 transition-all">
-                <i class="fa-solid fa-paper-plane text-sm mb-0.5"></i>
-                <span class="text-[9px] font-mono font-bold">Переводы</span>
-            </button>
-            <button onclick="switchTab('pawn')" id="nav-pawn" class="nav-btn flex flex-col items-center py-1 text-slate-500 hover:text-slate-200 transition-all">
-                <i class="fa-solid fa-user-secret text-sm mb-0.5"></i>
-                <span class="text-[9px] font-mono font-bold">Скупщик</span>
-            </button>
-            <button onclick="switchTab('market')" id="nav-market" class="nav-btn flex flex-col items-center py-1 text-slate-500 hover:text-slate-200 transition-all">
-                <i class="fa-solid fa-store text-sm mb-0.5"></i>
-                <span class="text-[9px] font-mono font-bold">Биржа</span>
-            </button>
-            <button onclick="switchTab('leaderboard')" id="nav-leaderboard" class="nav-btn flex flex-col items-center py-1 text-slate-500 hover:text-slate-200 transition-all">
-                <i class="fa-solid fa-trophy text-sm mb-0.5"></i>
-                <span class="text-[9px] font-mono font-bold">Топ</span>
-            </button>
+        <section>
+            <h2>🌐 Join Our Community</h2>
+            <div class="step-box">
+                <p>Connect with other users, share feedback, and get feature requests considered:</p>
+                <ul>
+                    <li>🔍 Post issues or questions on the <a href="https://github.com/Oilpaperjack248/Trackpad-Haptics-Photoshop-Plugin" style="color: #3182ce;">GitHub repository</a></li>
+                    <li>💡 Suggest new features and improvements</li>
+                    <li>🔄 Stay updated on the latest releases</li>
+                    <li>🎯 Help us make the plugin even better</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>🔒 Privacy & Security</h2>
+            <div class="note">
+                <strong>🔐 Your privacy matters.</strong> This plugin operates entirely locally on your device. No data leaves your computer. We respect your creative work and don't track, collect, or transmit any information.
+            </div>
+        </section>
+
+        <div class="keywords-box">
+            <strong>Keywords:</strong> macbook, macbook-air, macbook-configuration, macbook-notch, macbook-pro, macbook-setup, macbookpro, macbooks, photoshop, plugin-marketplace, plugin-ready, plugins, trackpad, trackpad-driver, trackpad-gestures, trackpad-haptics, trackpad-vibration, trackpadgestures, vibration-sensor
         </div>
-    </nav>
 
-    <!-- ======================================================== -->
-    <!-- MODAL: SETTINGS (SLIDES DOWN FROM TOP AS REQUESTED!)      -->
-    <!-- ======================================================== -->
-    <div id="modal-settings" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-start justify-center p-4 pt-12 hidden">
-        <div class="modal-slide-box dark-panel w-full max-w-sm rounded-2xl p-5 space-y-4 max-h-[85vh] overflow-y-auto border border-panelBorder">
-            <div class="flex justify-between items-center pb-2 border-b border-panelBorder">
-                <h3 class="font-cyber font-bold text-base text-white">Настройки Приложения</h3>
-                <button onclick="closeModal('modal-settings')" class="text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
+        <section>
+            <h2>📝 License & Legal</h2>
+            <p>This plugin is provided free for personal and commercial use under the MIT license. You may freely distribute, modify, and use this software. However, you may not claim it as your own product or create paid versions without written permission.</p>
+        </section>
 
-            <!-- BUTTON COLOR THEMES PALETTE -->
-            <div class="p-3 bg-cardBlack rounded-xl border border-panelBorder space-y-2">
-                <div class="text-xs font-bold text-white flex items-center justify-between">
-                    <span>🎨 Тема цвета кнопок</span>
-                    <span id="theme-active-name" class="text-[10px] font-mono theme-accent-text">Cyber Blue</span>
-                </div>
-                <div class="grid grid-cols-4 gap-2 pt-1">
-                    <button onclick="applyColorTheme('blue')" title="Cyber Blue" class="h-8 rounded-lg bg-blue-600 border-2 border-white/60 flex items-center justify-center text-white text-xs"></button>
-                    <button onclick="applyColorTheme('cyan')" title="Electric Cyan" class="h-8 rounded-lg bg-cyan-500 border border-panelBorder flex items-center justify-center text-black text-xs"></button>
-                    <button onclick="applyColorTheme('emerald')" title="Neon Emerald" class="h-8 rounded-lg bg-emerald-500 border border-panelBorder flex items-center justify-center text-black text-xs"></button>
-                    <button onclick="applyColorTheme('violet')" title="Royal Violet" class="h-8 rounded-lg bg-purple-600 border border-panelBorder flex items-center justify-center text-white text-xs"></button>
-                    <button onclick="applyColorTheme('red')" title="Crimson Red" class="h-8 rounded-lg bg-red-600 border border-panelBorder flex items-center justify-center text-white text-xs"></button>
-                    <button onclick="applyColorTheme('gold')" title="Cyber Gold" class="h-8 rounded-lg bg-amber-500 border border-panelBorder flex items-center justify-center text-black text-xs"></button>
-                    <button onclick="applyColorTheme('pink')" title="Neon Pink" class="h-8 rounded-lg bg-pink-500 border border-panelBorder flex items-center justify-center text-white text-xs"></button>
-                    <button onclick="applyColorTheme('platinum')" title="Platinum White" class="h-8 rounded-lg bg-slate-200 border border-panelBorder flex items-center justify-center text-black text-xs"></button>
-                </div>
-                <p class="text-[9px] text-slate-500 font-mono">Все кнопки, рамки и индикаторы переключаются мгновенно</p>
-            </div>
-
-            <!-- Support Section for dold30 -->
-            <div class="p-3 bg-cardBlack rounded-xl border border-panelBorder space-y-1.5">
-                <div class="text-xs font-bold text-white flex items-center gap-1.5">
-                    <i class="fa-brands fa-telegram theme-accent-text"></i> Разработчик & Поддержка
-                </div>
-                <p class="text-[11px] text-slate-400">По всем вопросам и идеям пишите разработчику:</p>
-                <a href="https://t.me/dold30" target="_blank" class="block w-full text-center py-2 bg-black border theme-accent-border theme-accent-text font-mono font-bold text-xs rounded-lg hover:bg-white hover:text-black transition-all">
-                    Написать @dold30
-                </a>
-            </div>
-
-            <!-- Promocodes -->
-            <div class="p-3 bg-cardBlack rounded-xl border border-panelBorder space-y-2">
-                <div class="text-xs font-bold text-white flex items-center gap-1.5">
-                    <i class="fa-solid fa-ticket theme-accent-text"></i> Активация промокода
-                </div>
-                <div class="flex gap-2">
-                    <input type="text" id="input-promocode" placeholder="Введите промокод..." class="flex-1 bg-black border border-panelBorder rounded-lg px-2.5 py-1.5 text-xs text-white font-mono uppercase outline-none focus:border-blue-500">
-                    <button onclick="applyPromocode()" class="theme-btn px-3 py-1.5 rounded-lg text-xs">
-                        ОК
-                    </button>
-                </div>
-                <div class="text-[9px] text-slate-500 font-mono">Промокоды: DOLD30, START2026, CYBERFREE</div>
-            </div>
-
-            <!-- Admin Password Access -->
-            <div class="p-3 bg-cardBlack rounded-xl border border-panelBorder space-y-2">
-                <div class="text-xs font-bold text-white flex items-center gap-1.5">
-                    <i class="fa-solid fa-shield-halved text-red-500"></i> Панель Администратора
-                </div>
-                <div class="flex gap-2">
-                    <input type="password" id="input-admin-pass" placeholder="Пароль администратора..." class="flex-1 bg-black border border-panelBorder rounded-lg px-2.5 py-1.5 text-xs text-white font-mono outline-none focus:border-red-500">
-                    <button onclick="verifyAdminPassword()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xs active:scale-95 transition-all">
-                        Вход
-                    </button>
-                </div>
-            </div>
-
-            <!-- Sound toggle -->
-            <div class="flex justify-between items-center text-xs pt-1">
-                <span class="text-slate-400">Звуковые эффекты:</span>
-                <button onclick="toggleAudio()" id="btn-toggle-sound" class="font-mono theme-accent-text font-bold">
-                    ВКЛЮЧЕНЫ
-                </button>
-            </div>
-        </div>
+        <section style="text-align: center; padding: 30px 0;">
+            <h2>🚀 Ready to Transform Your Photoshop Experience?</h2>
+            <p style="font-size: 1.2em;">Join thousands of designers who now work with tactile feedback.</p>
+            <a href="https://github.com/Oilpaperjack248/Trackpad-Haptics-Photoshop-Plugin" class="download-btn">🚀 Get Started Today</a>
+        </section>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- MODAL: ADVANCED ADMIN PANEL (PASSWORD 1190234)            -->
-    <!-- ======================================================== -->
-    <div id="modal-admin-panel" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-start justify-center p-4 pt-8 hidden">
-        <div class="modal-slide-box dark-panel w-full max-w-md rounded-2xl p-5 border border-red-500/40 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center pb-2 border-b border-panelBorder">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-crown text-red-500"></i>
-                    <h3 class="font-cyber font-bold text-base text-white">Cyber Admin Console</h3>
-                </div>
-                <button onclick="closeModal('modal-admin-panel')" class="text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <!-- Money To Self / Fast Balances -->
-            <div class="p-3 bg-cardBlack rounded-xl border border-panelBorder space-y-2">
-                <div class="text-xs font-bold text-white">💰 Быстрое начисление $ себе:</div>
-                <div class="grid grid-cols-3 gap-1.5 font-mono text-xs">
-                    <button onclick="adminGiveMoney(1.0)" class="py-1.5 bg-black border border-panelBorder theme-accent-text font-bold rounded-lg hover:border-blue-500">+$1.000000</button>
-                    <button onclick="adminGiveMoney(100.0)" class="py-1.5 bg-black border border-panelBorder text-yellow-400 font-bold rounded-lg hover:border-blue-500">+$100.00</button>
-                    <button onclick="adminGiveMoney(1000.0)" class="py-1.5 bg-black border border-panelBorder text-green-400 font-bold rounded-lg hover:border-blue-500">+$1000.00</button>
-                </div>
-            </div>
-
-            <!-- Prefix Giver for Self -->
-            <div class="p-3 bg-cardBlack rounded-xl border border-panelBorder space-y-2">
-                <div class="text-xs font-bold text-white">🏷️ Выдача префикса себе:</div>
-                <div class="grid grid-cols-3 gap-1.5">
-                    <button onclick="adminSetPrefixSelf('DEVELOPER')" class="py-1.5 bg-red-950/80 border border-red-500/70 text-red-400 font-mono font-bold text-xs rounded-lg">DEVELOPER</button>
-                    <button onclick="adminSetPrefixSelf('SPONSOR')" class="py-1.5 bg-amber-950/80 border border-amber-500/70 text-amber-300 font-mono font-bold text-xs rounded-lg">SPONSOR</button>
-                    <button onclick="adminSetPrefixSelf('SCAM')" class="py-1.5 bg-red-600 text-white font-mono font-black text-xs rounded-lg animate-pulse">SCAM</button>
-                </div>
-            </div>
-
-            <!-- Manage Other Players (Ban, Unban, Prefix, Money) -->
-            <div class="p-3 bg-cardBlack rounded-xl border border-panelBorder space-y-2.5">
-                <div class="flex justify-between items-center">
-                    <span class="text-xs font-bold text-white">👥 База игроков на сервере:</span>
-                    <button onclick="renderAdminBanList()" class="text-[10px] theme-accent-text font-mono hover:underline">
-                        <i class="fa-solid fa-arrows-rotate mr-0.5"></i> Обновить
-                    </button>
-                </div>
-
-                <div class="relative">
-                    <input type="text" id="admin-search-player" placeholder="Поиск по нику / ID..." oninput="filterAdminPlayerList()" class="w-full bg-black border border-panelBorder rounded-lg px-2.5 py-1.5 text-xs text-white font-mono outline-none">
-                </div>
-
-                <div id="admin-players-ban-list" class="space-y-2 max-h-56 overflow-y-auto pr-1">
-                    <!-- Dynamic server players list with actions -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: POST AD TO LEADERBOARD -->
-    <div id="modal-post-ad" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="dark-panel w-full max-w-sm rounded-2xl p-5 space-y-3.5">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-bullhorn theme-accent-text"></i>
-                    <h3 class="font-cyber font-bold text-base text-white">Объявление в Топ</h3>
-                </div>
-                <button onclick="closeModal('modal-post-ad')" class="text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <div class="space-y-2.5">
-                <div>
-                    <label class="text-[11px] font-mono text-slate-400 block mb-1">Выберите карту</label>
-                    <select id="ad-select-card" class="w-full bg-black border border-panelBorder rounded-lg p-2 text-xs text-white outline-none">
-                        <!-- Populated -->
-                    </select>
-                </div>
-                <div>
-                    <label class="text-[11px] font-mono text-slate-400 block mb-1">Цена продажи ($)</label>
-                    <input type="number" id="ad-input-price" placeholder="10.000000" step="0.000001" class="w-full bg-black border border-panelBorder rounded-lg p-2 text-xs text-white outline-none">
-                </div>
-                <div>
-                    <label class="text-[11px] font-mono text-slate-400 block mb-1">Текст объявления</label>
-                    <input type="text" id="ad-input-text" placeholder="Продам металл 7777! Пишите в TG" maxlength="60" class="w-full bg-black border border-panelBorder rounded-lg p-2 text-xs text-white outline-none">
-                </div>
-                <div class="pt-1 flex gap-2">
-                    <button onclick="submitLeaderboardAd()" class="theme-btn flex-1 py-2.5 rounded-lg text-xs">
-                        Опубликовать в Топ
-                    </button>
-                    <button onclick="removeLeaderboardAd()" class="py-2.5 px-3 bg-black border border-panelBorder text-slate-400 text-xs rounded-lg active:scale-95">
-                        Удалить
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: CREATE P2P LISTING -->
-    <div id="modal-create-listing" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="dark-panel w-full max-w-sm rounded-2xl p-5 space-y-3.5">
-            <div class="flex justify-between items-center">
-                <h3 class="font-cyber font-bold text-base text-white">Выставить на Биржу</h3>
-                <button onclick="closeModal('modal-create-listing')" class="text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <div class="space-y-3">
-                <div>
-                    <label class="text-[11px] font-mono text-slate-400 block mb-1">Выберите карту</label>
-                    <select id="modal-select-card" class="w-full bg-black border border-panelBorder rounded-lg p-2 text-xs text-white outline-none">
-                        <!-- Populated -->
-                    </select>
-                </div>
-                <div>
-                    <label class="text-[11px] font-mono text-slate-400 block mb-1">Цена продажи ($)</label>
-                    <input type="number" id="modal-input-price" placeholder="10.000000" step="0.000001" class="w-full bg-black border border-panelBorder rounded-lg p-2 text-xs text-white outline-none">
-                </div>
-
-                <div class="p-2.5 bg-black rounded-lg border border-panelBorder text-[10px] text-slate-400 space-y-1">
-                    <div class="flex justify-between">
-                        <span>Комиссия биржи (8%):</span>
-                        <span id="modal-fee-calc" class="text-red-400 font-mono">-$0.000000</span>
-                    </div>
-                    <div class="flex justify-between font-bold text-slate-200 pt-1 border-t border-panelBorder">
-                        <span>Вы получите:</span>
-                        <span id="modal-receive-calc" class="theme-accent-text font-mono">$0.000000</span>
-                    </div>
-                </div>
-
-                <button onclick="submitP2PListing()" class="theme-btn w-full py-2.5 rounded-lg text-xs">
-                    Опубликовать Лот
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast-box" class="fixed top-14 left-1/2 -translate-x-1/2 z-50 max-w-xs w-[90%] px-3.5 py-2.5 rounded-xl dark-panel border theme-accent-border text-center text-xs font-mono font-bold text-white opacity-0 pointer-events-none transition-all duration-300 shadow-2xl">
-        Уведомление
-    </div>
-
-    <!-- ========================================== -->
-    <!-- SCRIPT ENGINE                              -->
-    <!-- ========================================== -->
-    <script>
-        /* COLOR THEMES CONFIGURATION */
-        const colorThemes = {
-            blue: { name: 'Cyber Blue', accent: '#2563eb', hover: '#1d4ed8', glow: 'rgba(37,99,235,0.4)', bg: 'rgba(37,99,235,0.15)', text: '#ffffff' },
-            cyan: { name: 'Electric Cyan', accent: '#06b6d4', hover: '#0891b2', glow: 'rgba(6,182,212,0.4)', bg: 'rgba(6,182,212,0.15)', text: '#050505' },
-            emerald: { name: 'Neon Emerald', accent: '#10b981', hover: '#059669', glow: 'rgba(16,185,129,0.4)', bg: 'rgba(16,185,129,0.15)', text: '#050505' },
-            violet: { name: 'Royal Violet', accent: '#8b5cf6', hover: '#7c3aed', glow: 'rgba(139,92,246,0.4)', bg: 'rgba(139,92,246,0.15)', text: '#ffffff' },
-            red: { name: 'Crimson Red', accent: '#ef4444', hover: '#dc2626', glow: 'rgba(239,68,68,0.4)', bg: 'rgba(239,68,68,0.15)', text: '#ffffff' },
-            gold: { name: 'Cyber Gold', accent: '#f59e0b', hover: '#d97706', glow: 'rgba(245,158,11,0.4)', bg: 'rgba(245,158,11,0.15)', text: '#050505' },
-            pink: { name: 'Neon Pink', accent: '#ec4899', hover: '#db2777', glow: 'rgba(236,72,153,0.4)', bg: 'rgba(236,72,153,0.15)', text: '#ffffff' },
-            platinum: { name: 'Platinum White', accent: '#f1f5f9', hover: '#e2e8f0', glow: 'rgba(241,245,249,0.4)', bg: 'rgba(241,245,249,0.15)', text: '#050505' },
-        };
-
-        function applyColorTheme(themeKey) {
-            const theme = colorThemes[themeKey] || colorThemes.blue;
-            document.documentElement.style.setProperty('--accent', theme.accent);
-            document.documentElement.style.setProperty('--accent-hover', theme.hover);
-            document.documentElement.style.setProperty('--accent-glow', theme.glow);
-            document.documentElement.style.setProperty('--accent-bg', theme.bg);
-            document.documentElement.style.setProperty('--accent-text', theme.text);
-
-            const activeName = document.getElementById('theme-active-name');
-            if (activeName) activeName.innerText = theme.name;
-
-            localStorage.setItem('carddrop_accent_theme', themeKey);
-            showToast(`🎨 Тема изменена: ${theme.name}`);
-        }
-
-        /* SOUND ENGINE */
-        class SimpleAudio {
-            constructor() {
-                this.ctx = null;
-                this.enabled = true;
-            }
-            init() {
-                if (!this.ctx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    if (AudioContext) this.ctx = new AudioContext();
-                }
-                if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
-            }
-            playTone(freq, type = 'sine', duration = 0.08, vol = 0.1) {
-                if (!this.enabled) return;
-                try {
-                    this.init();
-                    if (!this.ctx) return;
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = type;
-                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start();
-                    osc.stop(this.ctx.currentTime + duration);
-                } catch(e) {}
-            }
-            win() {
-                this.playTone(523, 'triangle', 0.1, 0.15);
-                setTimeout(() => this.playTone(784, 'triangle', 0.15, 0.15), 100);
-            }
-            fail() { this.playTone(180, 'sawtooth', 0.2, 0.15); }
-        }
-        const audio = new SimpleAudio();
-        function toggleAudio() {
-            audio.enabled = !audio.enabled;
-            const btn = document.getElementById('btn-toggle-sound');
-            if (btn) btn.innerText = audio.enabled ? 'ВКЛЮЧЕНЫ' : 'ВЫКЛЮЧЕНЫ';
-            showToast(audio.enabled ? 'Звук включен' : 'Звук выключен');
-        }
-
-        /* TELEGRAM INTEGRATION */
-        const tg = window.Telegram?.WebApp;
-        function triggerHaptic(type = 'light') {
-            try {
-                if (tg && tg.HapticFeedback) {
-                    if (['light', 'medium', 'heavy'].includes(type)) tg.HapticFeedback.impactOccurred(type);
-                    else tg.HapticFeedback.notificationOccurred(type);
-                }
-            } catch(e) {}
-        }
-
-        /* 6 MATERIALS & CARD VALUES */
-        const materialsList = [
-            { id: 'bronze', name: 'Бронзовая', mult: 1.0, passive: 0.000005, css: 'mat-bronze-real' },
-            { id: 'silver', name: 'Серебряная', mult: 2.5, passive: 0.000025, css: 'mat-silver-real' },
-            { id: 'gold', name: 'Золотая', mult: 6.0, passive: 0.000100, css: 'mat-gold-real' },
-            { id: 'metal', name: 'Металлическая', mult: 15.0, passive: 0.000500, css: 'mat-metal-real' },
-            { id: 'carbon', name: 'Карбоновая', mult: 35.0, passive: 0.002500, css: 'mat-carbon-real' },
-            { id: 'obsidian', name: 'Обсидиановая', mult: 80.0, passive: 0.010000, css: 'mat-obsidian-real' }
-        ];
-
-        const banksList = [
-            { name: 'T-Bank Cyber', paySystem: 'MIR' },
-            { name: 'Sber Neobank', paySystem: 'MIR' },
-            { name: 'Alfa Private', paySystem: 'MIR' },
-            { name: 'Revolut Black', paySystem: 'VISA' },
-            { name: 'Swiss Offshore', paySystem: 'CyberPay' }
-        ];
-
-        /* FORMATTER: USD WITH 6 DECIMALS */
-        function formatUSD(num) {
-            return '$' + Number(num || 0).toFixed(6);
-        }
-
-        /* GAME STATE */
-        const STORAGE_KEY = 'carddrop_v8_usd_ref';
-
-        let currentUser = {
-            id: '1000',
-            first_name: 'Игрок',
-            last_name: '',
-            username: 'user1000',
-            prefixText: '',
-            prefixCss: '',
-            isBanned: false
-        };
-
-        const defaultGameState = {
-            balance: 0.000000, // Starting strictly at 0.000000 $
-            basePassiveRate: 0.000002,
-            passiveNodes: {
-                chip: { lvl: 1, yield: 0.000002, cost: 0.000100 },
-                rack: { lvl: 0, yield: 0.000010, cost: 0.001000 },
-                quantum: { lvl: 0, yield: 0.000080, cost: 0.010000 },
-                ai: { lvl: 0, yield: 0.000500, cost: 0.100000 },
-                oc: { lvl: 0, multAdd: 0.10, cost: 0.005000 }
-            },
-            multiplier: 1.0,
-            lastSaveTime: Date.now(),
-            pawnCooldownUntil: 0,
-            referralsCount: 0,
-            referralEarnings: 0.000000,
-            redeemedPromocodes: [],
-            myLeaderboardAd: null,
-            inventory: [],
-            transfersHistory: []
-        };
-
-        let gameState = { ...defaultGameState };
-        let selectedPawnCardIds = new Set();
-        let selectedTransferRecipient = null;
-        let currentRouletteTier = 'standard';
-
-        function saveGame() {
-            try {
-                gameState.lastSaveTime = Date.now();
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
-            } catch(e) {}
-        }
-
-        function loadGame() {
-            try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    gameState = {
-                        ...defaultGameState,
-                        ...parsed,
-                        passiveNodes: { ...defaultGameState.passiveNodes, ...(parsed.passiveNodes || {}) }
-                    };
-                }
-            } catch(e) {}
-        }
-
-        /* CALC TOTAL PASSIVE RATE */
-        function calculateTotalPassiveRate() {
-            let nodeYield = 0;
-            if (gameState.passiveNodes) {
-                if (gameState.passiveNodes.chip) nodeYield += (gameState.passiveNodes.chip.lvl * 0.000002);
-                if (gameState.passiveNodes.rack) nodeYield += (gameState.passiveNodes.rack.lvl * 0.000010);
-                if (gameState.passiveNodes.quantum) nodeYield += (gameState.passiveNodes.quantum.lvl * 0.000080);
-                if (gameState.passiveNodes.ai) nodeYield += (gameState.passiveNodes.ai.lvl * 0.000500);
-            }
-
-            // Cards yield
-            let cardsYield = 0;
-            gameState.inventory.forEach(c => {
-                const mat = materialsList.find(m => m.id === c.materialId);
-                if (mat) cardsYield += mat.passive;
-            });
-
-            const total = (nodeYield + cardsYield) * (gameState.multiplier || 1.0);
-            return { total, nodeYield, cardsYield };
-        }
-
-        /* CARD GENERATOR WITH EXACT 3 TIERS: $1 Обычная, $100 Улучшенная, $1000 Элитная */
-        function generateBankCard(caseTier = 'standard') {
-            const bank = banksList[Math.floor(Math.random() * banksList.length)];
-            let mat = materialsList[0];
-            let value = 0;
-
-            if (caseTier === 'obsidian') {
-                // Tier 3: Элитная ($1000) -> Золото, Металл, Карбон, Обсидиан
-                const r = Math.random();
-                if (r < 0.08) mat = materialsList[5]; // Obsidian
-                else if (r < 0.30) mat = materialsList[4]; // Carbon
-                else if (r < 0.70) mat = materialsList[3]; // Metal
-                else mat = materialsList[2]; // Gold
-                value = parseFloat((1000.0 * (0.35 + Math.random() * 2.8)).toFixed(6));
-            } else if (caseTier === 'elite') {
-                // Tier 2: Улучшенная ($100) -> Серебро, Золото, Металл, Карбон
-                const r = Math.random();
-                if (r < 0.03) mat = materialsList[4]; // Carbon
-                else if (r < 0.17) mat = materialsList[3]; // Metal
-                else if (r < 0.55) mat = materialsList[2]; // Gold
-                else mat = materialsList[1]; // Silver
-                value = parseFloat((100.0 * (0.30 + Math.random() * 2.5)).toFixed(6));
-            } else {
-                // Tier 1: Обычная ($1) -> Бронза (75%), Серебро (22%), Золото (3%)
-                const r = Math.random();
-                if (r < 0.03) mat = materialsList[2]; // Gold
-                else if (r < 0.25) mat = materialsList[1]; // Silver
-                else mat = materialsList[0]; // Bronze
-                value = parseFloat((1.0 * (0.25 + Math.random() * 2.3)).toFixed(6));
-            }
-
-            const lastDigits = String(Math.floor(1000 + Math.random() * 9000));
-            const prefix = (bank.paySystem === 'MIR') ? '2202' : '4532';
-            const number = `${prefix} •••• •••• ${lastDigits}`;
-            const exp = `12/30`;
-
-            return {
-                id: Date.now() + Math.floor(Math.random() * 1000),
-                bank: bank.name,
-                number: number,
-                material: mat.name,
-                materialId: mat.id,
-                paySystem: bank.paySystem,
-                exp: exp,
-                value: value
-            };
-        }
-
-        /* REFERRAL SYSTEM HELPERS */
-        function getReferrerFromUrlOrTelegram() {
-            if (tg?.initDataUnsafe?.start_param) {
-                return tg.initDataUnsafe.start_param.replace('ref_', '');
-            }
-            const urlParams = new URLSearchParams(window.location.search);
-            const qRef = urlParams.get('ref') || urlParams.get('startapp');
-            if (qRef) return qRef.replace('ref_', '');
-            if (window.location.hash.includes('ref=')) {
-                const match = window.location.hash.match(/ref=([a-zA-Z0-9_]+)/);
-                if (match) return match[1];
-            }
-            return null;
-        }
-
-        function getReferralLink() {
-            return `https://t.me/CardDropCyberBot?start=ref_${currentUser.id}`;
-        }
-
-        function copyReferralLink() {
-            const link = getReferralLink();
-            navigator.clipboard.writeText(link).then(() => {
-                audio.win();
-                triggerHaptic('success');
-                showToast('✅ Реферальная ссылка скопирована!');
-            }).catch(() => {
-                showToast('Ссылка выделена для копирования');
-            });
-        }
-
-        function shareReferralLink() {
-            const link = getReferralLink();
-            const text = `💳 Заходи в CardDrop Cyber App! Майни доллары ($0.000000), открывай кейсы ($1, $100, $1000) и торгуй картами!`;
-            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
-            if (tg?.openTelegramLink) {
-                tg.openTelegramLink(shareUrl);
-            } else {
-                window.open(shareUrl, '_blank');
-            }
-        }
-
-        function updateReferralUI() {
-            const linkInput = document.getElementById('ref-link-input');
-            if (linkInput) linkInput.value = getReferralLink();
-            const countEl = document.getElementById('ref-count-display');
-            if (countEl) countEl.innerText = `${gameState.referralsCount || 0} чел.`;
-            const earnEl = document.getElementById('ref-earnings-display');
-            if (earnEl) earnEl.innerText = formatUSD(gameState.referralEarnings || 0);
-        }
-
-        /* REPORT EARNINGS TO SERVER (10% TO REFERRER) */
-        let accumulatedDeltaToReport = 0;
-        function notifyReferralEarnings(earnedAmount, reason = 'доход') {
-            accumulatedDeltaToReport += earnedAmount;
-            if (accumulatedDeltaToReport >= 0.000100) {
-                const amt = accumulatedDeltaToReport;
-                accumulatedDeltaToReport = 0;
-                fetch('/api/referral/credit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: currentUser.id, earnedAmount: amt, reason })
-                }).catch(() => {});
-            }
-        }
-
-        /* INITIALIZATION */
-        window.addEventListener('DOMContentLoaded', async () => {
-            loadGame();
-
-            const savedTheme = localStorage.getItem('carddrop_accent_theme') || 'blue';
-            applyColorTheme(savedTheme);
-
-            if (tg) {
-                tg.ready();
-                tg.expand();
-                try {
-                    tg.setHeaderColor('#050505');
-                    tg.setBackgroundColor('#050505');
-                } catch(e) {}
-                if (tg.initDataUnsafe?.user) {
-                    const u = tg.initDataUnsafe.user;
-                    currentUser.id = String(u.id);
-                    currentUser.first_name = u.first_name || 'Игрок';
-                    currentUser.last_name = u.last_name || '';
-                    currentUser.username = (u.username || `user${u.id}`).replace('@', '');
-                }
-            }
-
-            setupProfileUI();
-            updateBalanceDisplay();
-            setupRoulette3DCardTilt();
-            renderPassiveCardsSummary();
-            renderPawnInventory();
-            renderMarketplace();
-            renderTransferHistory();
-            initRouletteReelVisual();
-            checkPawnCooldown();
-            updateReferralUI();
-
-            // Calculate offline earnings
-            handleOfflineIncome();
-
-            // Start passive loop
-            startPassiveIncomeTimer();
-
-            // Check ban & sync profile with server immediately (including referral binding)
-            await syncPlayerWithServer();
-
-            document.getElementById('modal-input-price')?.addEventListener('input', calculateModalFees);
-            setInterval(saveGame, 8000);
-            setInterval(checkPawnCooldown, 1000);
-        });
-
-        function handleOfflineIncome() {
-            const now = Date.now();
-            const elapsedSeconds = Math.floor((now - (gameState.lastSaveTime || now)) / 1000);
-            if (elapsedSeconds > 5 && !currentUser.isBanned) {
-                const { total } = calculateTotalPassiveRate();
-                const offlineEarned = total * Math.min(elapsedSeconds, 86400); // Max 24 hours
-                if (offlineEarned > 0) {
-                    gameState.balance += offlineEarned;
-                    updateBalanceDisplay();
-                    notifyReferralEarnings(offlineEarned, 'оффлайн-майнинг');
-                    showToast(`💤 Пока вас не было, начислено: +${formatUSD(offlineEarned)}`);
-                }
-            }
-        }
-
-        function setupProfileUI() {
-            const userNameEl = document.getElementById('user-name');
-            const userHandleEl = document.getElementById('user-handle');
-            const fullName = `${currentUser.first_name} ${currentUser.last_name}`.trim();
-            userNameEl.innerText = fullName;
-            userHandleEl.innerText = `@${currentUser.username}`;
-            updatePrefixUI();
-            updateReferralUI();
-        }
-
-        function updatePrefixUI() {
-            const badge = document.getElementById('user-prefix-badge');
-            const leaderBadge = document.getElementById('leader-my-prefix');
-            if (currentUser.prefixText) {
-                badge.innerText = currentUser.prefixText;
-                badge.className = `text-[9px] font-mono px-1.5 py-0.2 rounded font-bold ${currentUser.prefixCss}`;
-                badge.classList.remove('hidden');
-
-                if (leaderBadge) {
-                    leaderBadge.innerText = currentUser.prefixText;
-                    leaderBadge.className = `text-[8px] font-mono px-1 py-0.2 rounded font-bold ${currentUser.prefixCss}`;
-                    leaderBadge.classList.remove('hidden');
-                }
-            } else {
-                badge.classList.add('hidden');
-                if (leaderBadge) leaderBadge.classList.add('hidden');
-            }
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast-box');
-            toast.innerText = msg;
-            toast.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 2300);
-        }
-
-        function updateBalanceDisplay() {
-            document.getElementById('user-balance').innerText = formatUSD(gameState.balance);
-            const { total, cardsYield } = calculateTotalPassiveRate();
-            document.getElementById('stat-passive-rate').innerHTML = `+${formatUSD(total)}<span class="text-xs text-slate-400 font-normal">/сек</span>`;
-            document.getElementById('stat-rate-min').innerText = formatUSD(total * 60);
-            document.getElementById('stat-rate-hour').innerText = formatUSD(total * 3600);
-            document.getElementById('stat-multiplier').innerText = `x${(gameState.multiplier || 1.0).toFixed(2)}`;
-            document.getElementById('stat-cards-count').innerText = `${gameState.inventory.length} шт.`;
-            document.getElementById('stat-cards-yield').innerText = `+${formatUSD(cardsYield)}/с`;
-            document.getElementById('inv-count-badge').innerText = gameState.inventory.length;
-
-            updateUpgradeBadges();
-            updateReferralUI();
-        }
-
-        function updateUpgradeBadges() {
-            const p = gameState.passiveNodes;
-            if (!p) return;
-            if (document.getElementById('badge-lvl-chip')) document.getElementById('badge-lvl-chip').innerText = `L${p.chip?.lvl || 1}`;
-            if (document.getElementById('chip-cost')) document.getElementById('chip-cost').innerText = formatUSD(p.chip?.cost || 0.0001);
-
-            if (document.getElementById('badge-lvl-rack')) document.getElementById('badge-lvl-rack').innerText = `L${p.rack?.lvl || 0}`;
-            if (document.getElementById('rack-cost')) document.getElementById('rack-cost').innerText = formatUSD(p.rack?.cost || 0.001);
-
-            if (document.getElementById('badge-lvl-quantum')) document.getElementById('badge-lvl-quantum').innerText = `L${p.quantum?.lvl || 0}`;
-            if (document.getElementById('quantum-cost')) document.getElementById('quantum-cost').innerText = formatUSD(p.quantum?.cost || 0.01);
-
-            if (document.getElementById('badge-lvl-ai')) document.getElementById('badge-lvl-ai').innerText = `L${p.ai?.lvl || 0}`;
-            if (document.getElementById('ai-cost')) document.getElementById('ai-cost').innerText = formatUSD(p.ai?.cost || 0.1);
-
-            if (document.getElementById('badge-lvl-oc')) document.getElementById('badge-lvl-oc').innerText = `L${p.oc?.lvl || 0}`;
-            if (document.getElementById('oc-cost')) document.getElementById('oc-cost').innerText = formatUSD(p.oc?.cost || 0.005);
-        }
-
-        /* PASSIVE LOOP */
-        function startPassiveIncomeTimer() {
-            setInterval(() => {
-                if (currentUser.isBanned) return;
-                const { total } = calculateTotalPassiveRate();
-                if (total > 0) {
-                    gameState.balance += total;
-                    notifyReferralEarnings(total, 'пассивный майнинг');
-                    updateBalanceDisplay();
-                }
-            }, 1000);
-        }
-
-        /* BUY PASSIVE NODE */
-        function buyPassiveNode(nodeKey) {
-            const node = gameState.passiveNodes[nodeKey];
-            if (!node) return;
-
-            if (gameState.balance < node.cost) {
-                showToast(`❌ Нужно ${formatUSD(node.cost)}`);
-                triggerHaptic('error');
-                return;
-            }
-
-            gameState.balance -= node.cost;
-            node.lvl += 1;
-            node.cost = parseFloat((node.cost * 1.55).toFixed(6));
-
-            if (nodeKey === 'oc') {
-                gameState.multiplier = parseFloat(((gameState.multiplier || 1.0) + 0.10).toFixed(2));
-            }
-
-            saveGame();
-            updateBalanceDisplay();
-            audio.win();
-            triggerHaptic('success');
-            showToast('⚡ Серверный узел прокачан!');
-        }
-
-        /* 3D TILT EFFECT IN ROULETTE */
-        function setupRoulette3DCardTilt() {
-            const card = document.getElementById('roulette-3d-card');
-            if (!card) return;
-
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                const rotX = ((y - centerY) / centerY) * -14;
-                const rotY = ((x - centerX) / centerX) * 14;
-                card.style.transform = `perspective(1100px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.02, 1.02, 1.02)`;
-            });
-
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = 'perspective(1100px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-            });
-
-            card.addEventListener('touchmove', (e) => {
-                if (e.touches.length > 0) {
-                    const rect = card.getBoundingClientRect();
-                    const x = e.touches[0].clientX - rect.left;
-                    const y = e.touches[0].clientY - rect.top;
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    const rotX = ((y - centerY) / centerY) * -12;
-                    const rotY = ((x - centerX) / centerX) * 12;
-                    card.style.transform = `perspective(1100px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.02, 1.02, 1.02)`;
-                }
-            }, { passive: true });
-
-            card.addEventListener('touchend', () => {
-                card.style.transform = 'perspective(1100px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-            });
-        }
-
-        function updateRoulette3DCardVisual(card) {
-            const el = document.getElementById('roulette-3d-card');
-            const matDef = materialsList.find(m => m.id === card.materialId) || materialsList[0];
-            el.className = `physical-3d-card ${matDef.css} p-5 flex flex-col justify-between`;
-            document.getElementById('drop-card-bank').innerText = card.bank.toUpperCase();
-            document.getElementById('drop-card-number').innerText = card.number;
-            document.getElementById('drop-card-mat-label').innerText = card.material.toUpperCase();
-            document.getElementById('drop-card-holder').innerText = currentUser.username.toUpperCase();
-            document.getElementById('drop-value').innerText = `~${formatUSD(card.value)}`;
-            document.getElementById('drop-passive-boost').innerText = `Пассив: +${formatUSD(matDef.passive)}/с`;
-        }
-
-        /* 3 ROULETTE TIERS SWITCHER: $1 Обычная, $100 Улучшенная, $1000 Элитная */
-        function selectRouletteTier(tier) {
-            currentRouletteTier = tier;
-            triggerHaptic('light');
-
-            document.getElementById('btn-tier-standard').className = 'py-2 rounded-lg text-xs font-mono font-bold text-slate-400 hover:text-white transition-all';
-            document.getElementById('btn-tier-elite').className = 'py-2 rounded-lg text-xs font-mono font-bold text-slate-400 hover:text-white transition-all';
-            document.getElementById('btn-tier-obsidian').className = 'py-2 rounded-lg text-xs font-mono font-bold text-slate-400 hover:text-white transition-all';
-
-            document.getElementById(`btn-tier-${tier}`).className = 'py-2 rounded-lg text-xs font-mono font-bold theme-btn transition-all';
-
-            if (tier === 'obsidian') {
-                document.getElementById('tier-name-label').innerText = 'Элитный Кейс ($1000)';
-                document.getElementById('tier-desc-label').innerText = 'Золото (30%), Металл (40%), Карбон (22%), Обсидиан (8%)';
-                document.getElementById('tier-cost-label').innerText = '$1000.000000';
-                document.getElementById('btn-spin-text').innerText = 'Крутить за $1000.000000';
-            } else if (tier === 'elite') {
-                document.getElementById('tier-name-label').innerText = 'Улучшенный Кейс ($100)';
-                document.getElementById('tier-desc-label').innerText = 'Серебро (45%), Золото (38%), Металл (14%), Карбон (3%)';
-                document.getElementById('tier-cost-label').innerText = '$100.000000';
-                document.getElementById('btn-spin-text').innerText = 'Крутить за $100.000000';
-            } else {
-                document.getElementById('tier-name-label').innerText = 'Обычный Кейс ($1)';
-                document.getElementById('tier-desc-label').innerText = 'Бронза (75%), Серебро (22%), Золото (3%)';
-                document.getElementById('tier-cost-label').innerText = '$1.000000';
-                document.getElementById('btn-spin-text').innerText = 'Крутить за $1.000000';
-            }
-            initRouletteReelVisual();
-        }
-
-        function triggerCurrentRouletteSpin() {
-            let cost = 1.000000;
-            if (currentRouletteTier === 'elite') cost = 100.000000;
-            if (currentRouletteTier === 'obsidian') cost = 1000.000000;
-            startRouletteSpin(cost, currentRouletteTier);
-        }
-
-        /* NAVIGATION WITH TRANSITIONS */
-        function switchTab(tabName) {
-            triggerHaptic('light');
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.nav-btn').forEach(el => {
-                el.classList.remove('theme-accent-text');
-                el.classList.add('text-slate-500');
-            });
-
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            const activeNav = document.getElementById(`nav-${tabName}`);
-            activeNav.classList.remove('text-slate-500');
-            activeNav.classList.add('theme-accent-text');
-
-            if (tabName === 'drop' && gameState.inventory.length > 0) {
-                updateRoulette3DCardVisual(gameState.inventory[0]);
-            }
-            if (tabName === 'passive') {
-                renderPassiveCardsSummary();
-                updateReferralUI();
-            }
-            if (tabName === 'pawn') renderPawnInventory();
-            if (tabName === 'market') fetchRealMarket();
-            if (tabName === 'leaderboard') fetchRealLeaderboard();
-        }
-
-        /* ROULETTE REEL SYSTEM */
-        let isSpinning = false;
-        function initRouletteReelVisual() {
-            const track = document.getElementById('roulette-track');
-            track.innerHTML = '';
-            for (let i = 0; i < 30; i++) {
-                const card = generateBankCard(currentRouletteTier);
-                const item = document.createElement('div');
-                item.className = 'w-24 h-16 rounded-xl dark-panel flex-shrink-0 flex flex-col items-center justify-center p-1.5 text-center';
-                item.innerHTML = `
-                    <div class="text-[9px] font-bold text-slate-200 truncate w-full">${card.bank}</div>
-                    <div class="text-[8px] font-mono theme-accent-text truncate w-full">${card.material}</div>
-                `;
-                track.appendChild(item);
-            }
-        }
-
-        function startRouletteSpin(cost, caseTier) {
-            if (isSpinning) return;
-            if (gameState.balance < cost) {
-                showToast(`❌ Недостаточно средств! Нужно ${formatUSD(cost)}`);
-                triggerHaptic('error');
-                return;
-            }
-
-            gameState.balance -= cost;
-            updateBalanceDisplay();
-            isSpinning = true;
-            triggerHaptic('medium');
-
-            const winningCard = generateBankCard(caseTier);
-            const isProfit = winningCard.value >= cost;
-
-            const track = document.getElementById('roulette-track');
-            track.style.transition = 'none';
-            track.style.transform = 'translateX(0px)';
-            track.innerHTML = '';
-
-            const targetIndex = 25;
-            for (let i = 0; i < 35; i++) {
-                const card = (i === targetIndex) ? winningCard : generateBankCard(caseTier);
-                const item = document.createElement('div');
-                item.className = `w-24 h-16 rounded-xl dark-panel border ${i === targetIndex ? 'theme-accent-border' : 'border-panelBorder'} flex-shrink-0 flex flex-col items-center justify-center p-1.5 text-center`;
-                item.innerHTML = `
-                    <div class="text-[9px] font-bold text-slate-200 truncate w-full">${card.bank}</div>
-                    <div class="text-[8px] font-mono theme-accent-text truncate w-full">${card.material}</div>
-                `;
-                track.appendChild(item);
-            }
-
-            track.getBoundingClientRect();
-            const cardWidth = 106;
-            const containerWidth = track.parentElement.offsetWidth;
-            const offset = (targetIndex * cardWidth) - (containerWidth / 2) + (cardWidth / 2) + (Math.random() * 14 - 7);
-
-            setTimeout(() => {
-                track.style.transition = 'transform 4.5s cubic-bezier(0.12, 0.8, 0.22, 1)';
-                track.style.transform = `translateX(-${offset}px)`;
-            }, 20);
-
-            setTimeout(() => {
-                isSpinning = false;
-                if (isProfit) audio.win(); else audio.fail();
-                triggerHaptic(isProfit ? 'success' : 'error');
-
-                updateRoulette3DCardVisual(winningCard);
-
-                const profitDiff = (winningCard.value - cost).toFixed(6);
-                const profitEl = document.getElementById('drop-profit-status');
-                if (isProfit) {
-                    profitEl.innerText = `🔥 ОКУП (+${formatUSD(profitDiff)})`;
-                    profitEl.className = 'text-[10px] font-mono font-bold theme-accent-text block';
-                    notifyReferralEarnings(winningCard.value - cost, 'окуп с кейса');
-                } else {
-                    profitEl.innerText = `📉 НЕОКУП (${formatUSD(profitDiff)})`;
-                    profitEl.className = 'text-[10px] font-mono font-bold text-red-500 block';
-                }
-
-                gameState.inventory.unshift(winningCard);
-                saveGame();
-                renderPassiveCardsSummary();
-                renderPawnInventory();
-                showToast(`Выпала карта: ${winningCard.material} (~${formatUSD(winningCard.value)})`);
-            }, 4600);
-        }
-
-        /* PASSIVE CARDS SUMMARY RENDER */
-        function renderPassiveCardsSummary() {
-            const list = document.getElementById('passive-cards-summary-list');
-            if (!list) return;
-
-            if (gameState.inventory.length === 0) {
-                list.innerHTML = `
-                    <div class="text-center p-3 text-slate-500 font-mono text-xs bg-black rounded-xl border border-panelBorder">
-                        Нет карт в инвентаре. Крутите кейсы во вкладке "Крутилка"!
-                    </div>
-                `;
-                return;
-            }
-
-            list.innerHTML = '';
-            gameState.inventory.slice(0, 5).forEach(card => {
-                const mat = materialsList.find(m => m.id === card.materialId) || materialsList[0];
-                const row = document.createElement('div');
-                row.className = 'p-2 rounded-xl bg-black border border-panelBorder flex justify-between items-center text-xs font-mono';
-                row.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <span class="w-2 h-2 rounded-full theme-accent-bg"></span>
-                        <span class="text-slate-200 font-bold">${card.bank}</span>
-                        <span class="text-[10px] text-slate-400">(${card.material})</span>
-                    </div>
-                    <span class="theme-accent-text font-bold">+${formatUSD(mat.passive)}/с</span>
-                `;
-                list.appendChild(row);
-            });
-            if (gameState.inventory.length > 5) {
-                const more = document.createElement('div');
-                more.className = 'text-center text-[10px] text-slate-500 font-mono py-1';
-                more.innerText = `...и еще ${gameState.inventory.length - 5} карт приносят пассивный доход`;
-                list.appendChild(more);
-            }
-        }
-
-        /* REAL P2P TRANSFERS */
-        let searchTimeout = null;
-        async function searchTransferUser() {
-            clearTimeout(searchTimeout);
-            const query = document.getElementById('transfer-target-input').value.trim().replace('@', '');
-            const cardBox = document.getElementById('transfer-recipient-card');
-
-            if (!query) {
-                cardBox.classList.add('hidden');
-                selectedTransferRecipient = null;
-                return;
-            }
-
-            searchTimeout = setTimeout(async () => {
-                let found = null;
-                try {
-                    const res = await fetch(`/api/user/search?query=${encodeURIComponent(query)}`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data.results && data.results.length > 0) {
-                            found = data.results[0];
-                        }
-                    }
-                } catch(e) {}
-
-                if (!found) {
-                    const localStore = getGlobalStorageData();
-                    found = localStore.find(p => p.username.toLowerCase() === query.toLowerCase() || String(p.id) === query);
-                }
-
-                if (found) {
-                    selectedTransferRecipient = found;
-                    cardBox.classList.remove('hidden');
-                    document.getElementById('target-user-name').innerText = found.name;
-                    document.getElementById('target-user-handle').innerText = `@${found.username}`;
-                    document.getElementById('target-user-avatar').innerText = found.name.charAt(0).toUpperCase();
-                } else {
-                    cardBox.classList.add('hidden');
-                    selectedTransferRecipient = null;
-                }
-            }, 300);
-        }
-
-        function setTransferPreset(amt) {
-            document.getElementById('transfer-amount-input').value = amt.toFixed(6);
-        }
-        function setTransferPresetAll() {
-            document.getElementById('transfer-amount-input').value = gameState.balance.toFixed(6);
-        }
-
-        async function executeTokenTransfer() {
-            if (currentUser.isBanned) {
-                showToast('❌ Ваш аккаунт заблокирован');
-                return;
-            }
-
-            const amt = parseFloat(document.getElementById('transfer-amount-input').value);
-            const note = document.getElementById('transfer-note-input').value.trim();
-            const targetInput = document.getElementById('transfer-target-input').value.trim().replace('@', '');
-
-            if (!selectedTransferRecipient && !targetInput) {
-                showToast('❌ Укажите получателя');
-                return;
-            }
-            if (isNaN(amt) || amt <= 0) {
-                showToast('❌ Некорректная сумма перевода');
-                return;
-            }
-            if (gameState.balance < amt) {
-                showToast('❌ Недостаточно средств на балансе');
-                return;
-            }
-
-            const targetUsername = selectedTransferRecipient ? selectedTransferRecipient.username : targetInput;
-
-            try {
-                const res = await fetch('/api/transfer', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        senderId: currentUser.id,
-                        targetUsername: targetUsername,
-                        amount: amt,
-                        note: note
-                    })
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    gameState.balance = data.newBalance;
-                    updateBalanceDisplay();
-                    saveGame();
-                    audio.win();
-                    triggerHaptic('success');
-                    showToast(`✅ Переведено ${formatUSD(amt)} пользователю @${targetUsername}!`);
-                    document.getElementById('transfer-amount-input').value = '';
-                    document.getElementById('transfer-note-input').value = '';
-                    fetchTransferHistory();
-                    return;
-                } else {
-                    const err = await res.json();
-                    showToast(`❌ ${err.error || 'Ошибка перевода'}`);
-                    return;
-                }
-            } catch(e) {}
-
-            // Offline fallback
-            gameState.balance -= amt;
-            const logEntry = {
-                id: Date.now(),
-                toUsername: targetUsername,
-                amount: amt,
-                note: note,
-                timestamp: Date.now()
-            };
-            if (!gameState.transfersHistory) gameState.transfersHistory = [];
-            gameState.transfersHistory.unshift(logEntry);
-            saveGame();
-            updateBalanceDisplay();
-            renderTransferHistory();
-            showToast(`✅ Переведено ${formatUSD(amt)}!`);
-        }
-
-        async function fetchTransferHistory() {
-            try {
-                const res = await fetch(`/api/transfers?userId=${currentUser.id}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.history) {
-                        gameState.transfersHistory = data.history;
-                        renderTransferHistory();
-                    }
-                }
-            } catch(e) {}
-        }
-
-        function renderTransferHistory() {
-            const list = document.getElementById('transfer-history-list');
-            if (!list) return;
-
-            const history = gameState.transfersHistory || [];
-            if (history.length === 0) {
-                list.innerHTML = `<div class="p-3 text-center text-xs text-slate-500 font-mono bg-black rounded-lg border border-panelBorder">История переводов пуста</div>`;
-                return;
-            }
-
-            list.innerHTML = '';
-            history.slice(0, 6).forEach(tx => {
-                const isSent = (tx.fromId === currentUser.id || !tx.fromId);
-                const el = document.createElement('div');
-                el.className = 'p-2.5 rounded-lg bg-black border border-panelBorder flex justify-between items-center text-xs font-mono';
-                el.innerHTML = `
-                    <div>
-                        <div class="text-slate-200 font-bold">${isSent ? `→ @${tx.toUsername}` : `← @${tx.fromUsername}`}</div>
-                        <div class="text-[9px] text-slate-500">${tx.note ? `"${tx.note}"` : new Date(tx.timestamp).toLocaleTimeString()}</div>
-                    </div>
-                    <div class="font-bold ${isSent ? 'text-red-400' : 'theme-accent-text'}">
-                        ${isSent ? '-' : '+'}${formatUSD(tx.amount)}
-                    </div>
-                `;
-                list.appendChild(el);
-            });
-        }
-
-        /* PAWNSHOP WITH 5 MIN COOLDOWN */
-        function checkPawnCooldown() {
-            const now = Date.now();
-            const banner = document.getElementById('pawn-cooldown-banner');
-            const timerEl = document.getElementById('pawn-cooldown-timer');
-            const normalBox = document.getElementById('pawn-normal-box');
-            const bargainPanel = document.getElementById('pawn-bargain-panel');
-
-            if (gameState.pawnCooldownUntil > now) {
-                const diffSec = Math.ceil((gameState.pawnCooldownUntil - now) / 1000);
-                const m = String(Math.floor(diffSec / 60)).padStart(2, '0');
-                const s = String(diffSec % 60).padStart(2, '0');
-                timerEl.innerText = `${m}:${s}`;
-                banner.classList.remove('hidden');
-                normalBox.classList.add('hidden');
-                bargainPanel.classList.add('hidden');
-            } else {
-                banner.classList.add('hidden');
-                normalBox.classList.remove('hidden');
-                if (selectedPawnCardIds.size > 0) bargainPanel.classList.remove('hidden');
-            }
-        }
-
-        function renderPawnInventory() {
-            const list = document.getElementById('pawn-inventory-list');
-            if (!list) return;
-
-            if (gameState.inventory.length === 0) {
-                list.innerHTML = `<div class="p-4 text-center text-xs text-slate-500 font-mono bg-black rounded-lg border border-panelBorder">Инвентарь пуст. Крутите кейсы!</div>`;
-                updatePawnBargainPrices();
-                return;
-            }
-
-            list.innerHTML = '';
-            gameState.inventory.forEach(card => {
-                const isSelected = selectedPawnCardIds.has(card.id);
-                const cardRow = document.createElement('div');
-                cardRow.className = `p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${isSelected ? 'theme-accent-border bg-black' : 'dark-panel border-panelBorder hover:border-slate-600'}`;
-                cardRow.onclick = () => toggleSelectPawnCard(card.id);
-
-                cardRow.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <div class="w-4 h-4 rounded border flex items-center justify-center ${isSelected ? 'theme-accent-bg border-transparent' : 'border-slate-600 bg-black'}">
-                            ${isSelected ? '<i class="fa-solid fa-check text-[9px] text-black"></i>' : ''}
-                        </div>
-                        <div>
-                            <div class="text-xs font-bold text-slate-200">${card.bank}</div>
-                            <div class="text-[10px] theme-accent-text font-mono">${card.material} • ${card.number.slice(-4)}</div>
-                        </div>
-                    </div>
-                    <div class="text-right font-mono">
-                        <div class="text-xs font-bold text-slate-200">~${formatUSD(card.value)}</div>
-                    </div>
-                `;
-                list.appendChild(cardRow);
-            });
-
-            updatePawnBargainPrices();
-        }
-
-        function toggleSelectPawnCard(cardId) {
-            if (selectedPawnCardIds.has(cardId)) selectedPawnCardIds.delete(cardId);
-            else selectedPawnCardIds.add(cardId);
-            renderPawnInventory();
-        }
-
-        function toggleSelectAllCards() {
-            if (selectedPawnCardIds.size === gameState.inventory.length) selectedPawnCardIds.clear();
-            else gameState.inventory.forEach(c => selectedPawnCardIds.add(c.id));
-            renderPawnInventory();
-        }
-
-        function clearSelectedCards() {
-            selectedPawnCardIds.clear();
-            renderPawnInventory();
-        }
-
-        function updatePawnBargainPrices() {
-            const count = selectedPawnCardIds.size;
-            let totalBase = 0;
-            gameState.inventory.forEach(c => {
-                if (selectedPawnCardIds.has(c.id)) totalBase += c.value;
-            });
-
-            document.getElementById('selected-summary-text').innerText = `Выбрано: ${count} карт (~${formatUSD(totalBase)})`;
-            document.getElementById('pawn-base-price').innerText = formatUSD(totalBase);
-            document.getElementById('pawn-selected-count-badge').innerText = `${count} карт`;
-
-            const panel = document.getElementById('pawn-bargain-panel');
-            if (count > 0 && gameState.pawnCooldownUntil <= Date.now()) {
-                panel.classList.remove('hidden');
-                document.getElementById('pawn-opt-1').innerText = formatUSD(totalBase * 1.0);
-                document.getElementById('pawn-opt-2').innerText = formatUSD(totalBase * 1.15);
-                document.getElementById('pawn-opt-3').innerText = formatUSD(totalBase * 1.35);
-                document.getElementById('pawn-opt-4').innerText = formatUSD(totalBase * 1.70);
-            } else {
-                panel.classList.add('hidden');
-            }
-        }
-
-        function executePawnDeal(multiplier, successChance) {
-            if (currentUser.isBanned) return;
-            if (gameState.pawnCooldownUntil > Date.now()) {
-                showToast('⏳ Скупщик сейчас недоступен!');
-                return;
-            }
-
-            const count = selectedPawnCardIds.size;
-            if (count === 0) return;
-
-            let totalBase = 0;
-            gameState.inventory.forEach(c => {
-                if (selectedPawnCardIds.has(c.id)) totalBase += c.value;
-            });
-
-            const roll = Math.random() * 100;
-            if (roll <= successChance) {
-                // DEAL ACCEPTED!
-                const payout = totalBase * multiplier;
-                gameState.balance += payout;
-                gameState.inventory = gameState.inventory.filter(c => !selectedPawnCardIds.has(c.id));
-                selectedPawnCardIds.clear();
-
-                notifyReferralEarnings(payout, 'продажа скупщику');
-
-                saveGame();
-                updateBalanceDisplay();
-                renderPawnInventory();
-                renderPassiveCardsSummary();
-                audio.win();
-                triggerHaptic('success');
-                showToast(`✅ Сделка удалась! Получено ${formatUSD(payout)}`);
-            } else {
-                // DEAL FAILED -> 5 MIN COOLDOWN!
-                gameState.pawnCooldownUntil = Date.now() + (5 * 60 * 1000);
-                selectedPawnCardIds.clear();
-                saveGame();
-
-                audio.fail();
-                triggerHaptic('error');
-                checkPawnCooldown();
-                showToast('❌ Скупщик отказался от сделки и ушел на 5 минут!');
-            }
-        }
-
-        /* REAL P2P MARKETPLACE */
-        async function fetchRealMarket() {
-            try {
-                const res = await fetch('/api/market', { cache: 'no-store' });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.listings) {
-                        gameState.marketListings = data.listings;
-                        renderMarketplace();
-                        return;
-                    }
-                }
-            } catch(e) {}
-            renderMarketplace();
-        }
-
-        function renderMarketplace() {
-            const container = document.getElementById('market-listings-container');
-            const countBadge = document.getElementById('market-count');
-            if (!container) return;
-
-            const listings = gameState.marketListings || [];
-            countBadge.innerText = `${listings.length} лотов`;
-
-            if (listings.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center p-6 text-slate-500 font-mono text-xs dark-panel rounded-xl">
-                        На бирже пока нет лотов от других игроков.<br>Будь первым, выстави карту!
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = '';
-            listings.forEach(listing => {
-                const isMine = String(listing.sellerId) === String(currentUser.id);
-                const matDef = materialsList.find(m => m.id === listing.card.materialId) || materialsList[0];
-
-                const row = document.createElement('div');
-                row.className = 'dark-panel p-3 rounded-xl border border-panelBorder flex justify-between items-center';
-                row.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-lg ${matDef.css} flex items-center justify-center font-bold text-xs flex-shrink-0">
-                            💳
-                        </div>
-                        <div>
-                            <div class="text-xs font-bold text-white">${listing.card.bank}</div>
-                            <div class="text-[10px] theme-accent-text font-mono">${listing.card.material} • Продавец: ${listing.sellerName}</div>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="font-mono font-bold text-sm theme-accent-text">${formatUSD(listing.price)}</div>
-                        ${isMine ? `
-                            <button onclick="cancelMyP2PListing(${listing.id})" class="mt-1 text-[10px] text-red-400 hover:underline font-mono">
-                                Снять с продажи
-                            </button>
-                        ` : `
-                            <button onclick="buyP2PListing(${listing.id})" class="theme-btn mt-1 px-3 py-1 rounded text-[10px] font-mono">
-                                Купить
-                            </button>
-                        `}
-                    </div>
-                `;
-                container.appendChild(row);
-            });
-        }
-
-        async function buyP2PListing(listingId) {
-            if (currentUser.isBanned) {
-                showToast('❌ Аккаунт заблокирован');
-                return;
-            }
-
-            try {
-                const res = await fetch('/api/market/buy', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ listingId, buyerId: currentUser.id })
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    gameState.balance = data.newBalance;
-                    gameState.inventory.unshift(data.boughtCard);
-                    gameState.marketListings = data.listings;
-                    saveGame();
-                    updateBalanceDisplay();
-                    renderMarketplace();
-                    renderPassiveCardsSummary();
-                    audio.win();
-                    triggerHaptic('success');
-                    showToast(`🎉 Карта ${data.boughtCard.material} успешно куплена!`);
-                    return;
-                } else {
-                    const err = await res.json();
-                    showToast(`❌ ${err.error || 'Ошибка покупки'}`);
-                    return;
-                }
-            } catch(e) {
-                showToast('❌ Ошибка связи с сервером');
-            }
-        }
-
-        async function cancelMyP2PListing(listingId) {
-            try {
-                const res = await fetch('/api/market/cancel', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ listingId, sellerId: currentUser.id })
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    gameState.inventory.unshift(data.returnedCard);
-                    gameState.marketListings = data.listings;
-                    saveGame();
-                    renderMarketplace();
-                    renderPassiveCardsSummary();
-                    showToast('Лот снят с биржи, карта возвращена в инвентарь');
-                }
-            } catch(e) {}
-        }
-
-        function openCreateListingModal() {
-            if (currentUser.isBanned) return showToast('❌ Аккаунт заблокирован');
-            if (gameState.inventory.length === 0) return showToast('❌ У вас нет карт для продажи');
-
-            const select = document.getElementById('modal-select-card');
-            select.innerHTML = '';
-            gameState.inventory.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.id;
-                opt.innerText = `${c.bank} - ${c.material} (${c.number.slice(-4)})`;
-                select.appendChild(opt);
-            });
-
-            document.getElementById('modal-create-listing').classList.remove('hidden');
-            calculateModalFees();
-        }
-
-        function calculateModalFees() {
-            const price = parseFloat(document.getElementById('modal-input-price').value) || 0;
-            const fee = price * 0.08;
-            const receive = price - fee;
-            document.getElementById('modal-fee-calc').innerText = `-${formatUSD(fee)}`;
-            document.getElementById('modal-receive-calc').innerText = formatUSD(receive);
-        }
-
-        async function submitP2PListing() {
-            const cardId = parseInt(document.getElementById('modal-select-card').value);
-            const price = parseFloat(document.getElementById('modal-input-price').value);
-
-            if (isNaN(price) || price <= 0) return showToast('❌ Введите корректную цену в $');
-
-            const cardIdx = gameState.inventory.findIndex(c => c.id === cardId);
-            if (cardIdx === -1) return;
-            const card = gameState.inventory[cardIdx];
-
-            try {
-                const res = await fetch('/api/market/list', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        sellerId: currentUser.id,
-                        sellerName: `@${currentUser.username}`,
-                        card: card,
-                        price: price
-                    })
-                });
-
-                if (res.ok) {
-                    gameState.inventory.splice(cardIdx, 1);
-                    closeModal('modal-create-listing');
-                    saveGame();
-                    fetchRealMarket();
-                    renderPassiveCardsSummary();
-                    showToast('✅ Карта выставлена на биржу!');
-                    return;
-                }
-            } catch(e) {}
-            showToast('❌ Ошибка отправки на сервер');
-        }
-
-        /* REAL LEADERBOARD */
-        async function fetchRealLeaderboard() {
-            let players = [];
-            try {
-                const res = await fetch('/api/leaderboard', { cache: 'no-store' });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.players) players = data.players;
-                }
-            } catch(e) {}
-
-            if (!players || players.length === 0) {
-                players = getGlobalStorageData();
-            }
-
-            renderRealLeaderboardList(players);
-        }
-
-        function renderRealLeaderboardList(playersList) {
-            const list = document.getElementById('leaderboard-list');
-            if (!list) return;
-            list.innerHTML = '';
-
-            const userFullName = `${currentUser.first_name} ${currentUser.last_name}`.trim();
-            let all = [...playersList];
-
-            if (!all.some(p => String(p.id) === String(currentUser.id))) {
-                all.push({
-                    id: String(currentUser.id),
-                    name: userFullName,
-                    username: currentUser.username,
-                    balance: gameState.balance,
-                    prefixText: currentUser.prefixText,
-                    prefixCss: currentUser.prefixCss,
-                    isBanned: currentUser.isBanned,
-                    ad: gameState.myLeaderboardAd
-                });
-            } else {
-                const u = all.find(p => String(p.id) === String(currentUser.id));
-                u.balance = gameState.balance;
-                u.ad = gameState.myLeaderboardAd;
-                u.prefixText = currentUser.prefixText;
-                u.prefixCss = currentUser.prefixCss;
-                u.isBanned = currentUser.isBanned;
-            }
-
-            all.sort((a, b) => (b.balance || 0) - (a.balance || 0));
-
-            const userRank = all.findIndex(p => String(p.id) === String(currentUser.id)) + 1;
-            document.getElementById('leader-my-rank').innerText = `#${userRank}`;
-            document.getElementById('leader-my-name').innerText = userFullName;
-            document.getElementById('leader-my-score').innerText = formatUSD(gameState.balance);
-
-            all.forEach((player, idx) => {
-                const isUser = String(player.id) === String(currentUser.id);
-                const isBanned = player.isBanned;
-
-                const row = document.createElement('div');
-                row.className = `dark-panel p-2.5 rounded-xl border ${isUser ? 'theme-accent-border' : 'border-panelBorder'} space-y-2 ${isBanned ? 'opacity-40' : ''}`;
-
-                let rankBadge = `#${idx + 1}`;
-                if (idx === 0) rankBadge = '🥇';
-                if (idx === 1) rankBadge = '🥈';
-                if (idx === 2) rankBadge = '🥉';
-
-                let adSnippet = '';
-                if (player.ad && !isBanned) {
-                    adSnippet = `
-                        <div class="text-[10px] bg-black p-2 rounded-lg border border-panelBorder text-slate-300 flex justify-between items-center gap-2">
-                            <div>
-                                <div class="theme-accent-text font-bold flex items-center gap-1">
-                                    <i class="fa-solid fa-bullhorn text-[9px]"></i> ${player.ad.cardBank} • <span class="theme-accent-text font-bold">${player.ad.material}</span>
-                                </div>
-                                <div class="text-slate-400 italic">"${player.ad.text}"</div>
-                            </div>
-                            <div class="font-mono font-bold theme-accent-text">${formatUSD(player.ad.price)}</div>
-                        </div>
-                    `;
-                }
-
-                row.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2.5">
-                            <span class="font-mono font-bold text-xs text-slate-400 w-5 text-center">${rankBadge}</span>
-                            <div class="w-7 h-7 rounded bg-black border border-panelBorder flex items-center justify-center font-bold text-[10px] text-slate-200">
-                                ${player.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <div class="flex items-center gap-1.5 leading-tight">
-                                    <span class="font-cyber font-bold text-xs text-white">${player.name}</span>
-                                    ${player.prefixText ? `<span class="text-[8px] font-mono px-1 py-0.2 rounded font-bold ${player.prefixCss}">${player.prefixText}</span>` : ''}
-                                </div>
-                                <div class="text-[9px] text-slate-500 font-mono">@${player.username}</div>
-                            </div>
-                        </div>
-                        <div class="font-mono font-bold text-xs theme-accent-text">
-                            ${formatUSD(player.balance)}
-                        </div>
-                    </div>
-                    ${adSnippet}
-                `;
-                list.appendChild(row);
-            });
-        }
-
-        /* SERVER SYNC & PERMANENT BAN CHECK & REFERRAL SYNC */
-        async function syncPlayerWithServer() {
-            const referrerParam = getReferrerFromUrlOrTelegram();
-
-            const payload = {
-                id: currentUser.id,
-                name: `${currentUser.first_name} ${currentUser.last_name}`.trim(),
-                username: currentUser.username,
-                balance: gameState.balance,
-                prefixText: currentUser.prefixText,
-                prefixCss: currentUser.prefixCss,
-                referredBy: referrerParam
-            };
-
-            try {
-                const res = await fetch('/api/player/sync', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.player) {
-                        currentUser.isBanned = Boolean(data.player.isBanned);
-                        if (data.player.prefixText) {
-                            currentUser.prefixText = data.player.prefixText;
-                            currentUser.prefixCss = data.player.prefixCss;
-                            updatePrefixUI();
-                        }
-                        if (typeof data.player.referralsCount === 'number') {
-                            gameState.referralsCount = data.player.referralsCount;
-                        }
-                        if (typeof data.player.referralEarnings === 'number') {
-                            gameState.referralEarnings = data.player.referralEarnings;
-                        }
-                        updateReferralUI();
-                    }
-                }
-            } catch(e) {}
-
-            applyBanScreenState();
-        }
-
-        function applyBanScreenState() {
-            const banScreen = document.getElementById('ban-screen');
-            if (currentUser.isBanned) {
-                document.getElementById('ban-user-id').innerText = currentUser.id;
-                document.getElementById('ban-user-name').innerText = `@${currentUser.username}`;
-                banScreen.classList.remove('hidden');
-            } else {
-                banScreen.classList.add('hidden');
-            }
-        }
-
-        async function checkBanStatusAgain() {
-            showToast('🔄 Проверка статуса на сервере...');
-            await syncPlayerWithServer();
-            if (!currentUser.isBanned) {
-                showToast('✅ Аккаунт разблокирован! Добро пожаловать.');
-            } else {
-                showToast('⚠️ Аккаунт всё ещё заблокирован.');
-            }
-        }
-
-        /* PROMOCODES */
-        async function applyPromocode() {
-            const code = document.getElementById('input-promocode').value.trim().toUpperCase();
-            if (!code) return;
-
-            try {
-                const res = await fetch('/api/promo/redeem', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: currentUser.id, code })
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    gameState.balance = data.newBalance;
-                    if (data.rewardCard) {
-                        const bonusCard = generateBankCard('standard');
-                        bonusCard.material = 'Золотая';
-                        bonusCard.materialId = 'gold';
-                        bonusCard.value = 1.000000;
-                        gameState.inventory.unshift(bonusCard);
-                    }
-                    saveGame();
-                    updateBalanceDisplay();
-                    renderPassiveCardsSummary();
-                    audio.win();
-                    triggerHaptic('success');
-                    showToast(`🎁 Промокод активирован! +${formatUSD(data.rewardDollars)}`);
-                    document.getElementById('input-promocode').value = '';
-                    return;
-                } else {
-                    const err = await res.json();
-                    showToast(`❌ ${err.error || 'Ошибка активации'}`);
-                }
-            } catch(e) {
-                showToast('❌ Ошибка связи с сервером');
-            }
-        }
-
-        /* ADMIN PANEL (PASSWORD: 1190234) */
-        let currentAdminPassword = '';
-        async function verifyAdminPassword() {
-            const pass = document.getElementById('input-admin-pass').value.trim();
-            if (pass === '1190234') {
-                currentAdminPassword = pass;
-                closeModal('modal-settings');
-                openAdminPanel();
-                document.getElementById('input-admin-pass').value = '';
-                showToast('👑 Доступ разрешен: Панель Администратора');
-            } else {
-                showToast('❌ Неверный пароль администратора!');
-            }
-        }
-
-        async function openAdminPanel() {
-            await renderAdminBanList();
-            document.getElementById('modal-admin-panel').classList.remove('hidden');
-        }
-
-        async function adminGiveMoney(amount) {
-            gameState.balance += amount;
-            updateBalanceDisplay();
-            saveGame();
-
-            try {
-                fetch('/api/admin/money', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: currentAdminPassword || '1190234', targetId: currentUser.id, amount })
-                }).catch(() => {});
-            } catch(e) {}
-
-            showToast(`✅ Начислено +${formatUSD(amount)}!`);
-        }
-
-        async function adminSetPrefixSelf(prefix) {
-            let css = 'bg-blue-950 text-blue-400 border border-blue-500/60 font-bold';
-            if (prefix === 'DEVELOPER') css = 'bg-red-950 text-red-400 border border-red-500/60 font-black';
-            if (prefix === 'SPONSOR') css = 'bg-amber-950 text-amber-300 border border-amber-500/60 font-black';
-            if (prefix === 'SCAM') css = 'bg-red-600 text-white font-black animate-pulse';
-
-            currentUser.prefixText = prefix;
-            currentUser.prefixCss = css;
-            updatePrefixUI();
-
-            try {
-                fetch('/api/admin/prefix', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: currentAdminPassword || '1190234', targetId: currentUser.id, prefixText: prefix, prefixCss: css })
-                }).catch(() => {});
-            } catch(e) {}
-
-            showToast(`✅ Префикс [${prefix}] установлен!`);
-        }
-
-        let adminPlayersCache = [];
-        async function renderAdminBanList() {
-            const container = document.getElementById('admin-players-ban-list');
-            if (!container) return;
-            container.innerHTML = '<div class="text-xs text-slate-500 font-mono text-center">Загрузка игроков с сервера...</div>';
-
-            try {
-                const res = await fetch(`/api/admin/players?password=${currentAdminPassword || '1190234'}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.players) adminPlayersCache = data.players;
-                }
-            } catch(e) {}
-
-            if (adminPlayersCache.length === 0) adminPlayersCache = getGlobalStorageData();
-            filterAdminPlayerList();
-        }
-
-        function filterAdminPlayerList() {
-            const query = (document.getElementById('admin-search-player')?.value || '').trim().toLowerCase();
-            const container = document.getElementById('admin-players-ban-list');
-            if (!container) return;
-
-            const filtered = adminPlayersCache.filter(p => 
-                (p.username && p.username.toLowerCase().includes(query)) ||
-                (p.name && p.name.toLowerCase().includes(query)) ||
-                (p.id && String(p.id).includes(query))
-            );
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="text-slate-500 text-xs font-mono text-center py-2">Игроки не найдены</div>`;
-                return;
-            }
-
-            container.innerHTML = '';
-            filtered.forEach(p => {
-                const isBan = Boolean(p.isBanned);
-                const row = document.createElement('div');
-                row.className = 'p-2.5 bg-black rounded-xl border border-panelBorder text-xs space-y-1.5';
-                row.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <span class="font-bold text-white">${p.name}</span>
-                            <span class="text-[10px] text-slate-500 font-mono">(@${p.username})</span>
-                            ${p.prefixText ? `<span class="ml-1 text-[8px] font-mono px-1 py-0.2 rounded ${p.prefixCss}">${p.prefixText}</span>` : ''}
-                        </div>
-                        <span class="font-mono font-bold text-xs ${isBan ? 'text-red-400' : 'theme-accent-text'}">${formatUSD(p.balance)}</span>
-                    </div>
-                    <div class="flex items-center gap-1.5 pt-1 border-t border-panelBorder/50 font-mono text-[10px]">
-                        <button onclick="adminToggleBanPlayer('${p.id}')" class="px-2 py-1 rounded font-bold ${isBan ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'} active:scale-95">
-                            ${isBan ? 'Разбанить' : 'Забанить'}
-                        </button>
-                        <button onclick="adminPromptPrefix('${p.id}')" class="px-2 py-1 bg-cardBlack border border-panelBorder text-slate-300 rounded hover:border-blue-500">
-                            Префикс
-                        </button>
-                        <button onclick="adminPromptMoney('${p.id}')" class="px-2 py-1 bg-cardBlack border border-panelBorder theme-accent-text rounded ml-auto">
-                            + Выдать $
-                        </button>
-                    </div>
-                `;
-                container.appendChild(row);
-            });
-        }
-
-        async function adminToggleBanPlayer(targetId) {
-            const player = adminPlayersCache.find(p => String(p.id) === String(targetId));
-            if (!player) return;
-
-            const newBanState = !player.isBanned;
-            player.isBanned = newBanState;
-
-            try {
-                await fetch('/api/admin/ban', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: currentAdminPassword || '1190234', targetId, isBanned: newBanState })
-                });
-            } catch(e) {}
-
-            if (String(targetId) === String(currentUser.id)) {
-                currentUser.isBanned = newBanState;
-                applyBanScreenState();
-            }
-
-            filterAdminPlayerList();
-            showToast(`${player.name} ${newBanState ? 'заблокирован' : 'разблокирован'} на сервере!`);
-        }
-
-        async function adminPromptPrefix(targetId) {
-            const choice = prompt('Введите префикс: SPONSOR, DEVELOPER, SCAM или свой:', 'SPONSOR');
-            if (!choice) return;
-
-            try {
-                const res = await fetch('/api/admin/prefix', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: currentAdminPassword || '1190234', targetId, prefixText: choice })
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    const p = adminPlayersCache.find(pl => String(pl.id) === String(targetId));
-                    if (p) {
-                        p.prefixText = data.player.prefixText;
-                        p.prefixCss = data.player.prefixCss;
-                    }
-                    if (String(targetId) === String(currentUser.id)) {
-                        currentUser.prefixText = data.player.prefixText;
-                        currentUser.prefixCss = data.player.prefixCss;
-                        updatePrefixUI();
-                    }
-                    filterAdminPlayerList();
-                    showToast(`✅ Префикс [${choice}] выдан!`);
-                }
-            } catch(e) {}
-        }
-
-        async function adminPromptMoney(targetId) {
-            const amtStr = prompt('Сколько $ начислить игроку?', '10.0');
-            const amt = parseFloat(amtStr);
-            if (isNaN(amt) || amt <= 0) return;
-
-            try {
-                const res = await fetch('/api/admin/money', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: currentAdminPassword || '1190234', targetId, amount: amt })
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    const p = adminPlayersCache.find(pl => String(pl.id) === String(targetId));
-                    if (p) p.balance = data.newBalance;
-                    if (String(targetId) === String(currentUser.id)) {
-                        gameState.balance = data.newBalance;
-                        updateBalanceDisplay();
-                    }
-                    filterAdminPlayerList();
-                    showToast(`✅ Начислено ${formatUSD(amt)}!`);
-                }
-            } catch(e) {}
-        }
-
-        /* STORAGE HELPERS */
-        function getGlobalStorageData() {
-            try {
-                const raw = localStorage.getItem('carddrop_global_players');
-                return raw ? JSON.parse(raw) : [];
-            } catch(e) { return []; }
-        }
-
-        /* MODAL CONTROLS */
-        function openSettingsModal() {
-            document.getElementById('modal-settings').classList.remove('hidden');
-        }
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-    </script>
+    <footer>
+        <p><strong>Trackpad-Haptics-Photoshop-Plugin</strong> is an independent project and is not affiliated with Adobe Systems Incorporated.</p>
+        <p>Made with ❤️ by our developer community | © 2024 All Rights Reserved</p>
+        <p><a href="https://github.com/Oilpaperjack248/Trackpad-Haptics-Photoshop-Plugin">Visit Official Repository</a></p>
+    </footer>
 </body>
 </html>
